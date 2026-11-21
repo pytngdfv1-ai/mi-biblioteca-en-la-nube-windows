@@ -40,20 +40,23 @@ class _CachedNet extends StatefulWidget {
 class _CachedNetState extends State<_CachedNet> {
   File? _file;
   bool _failed = false;
+  int _retries = 0;
 
   @override
   void initState() {
     super.initState();
-    _resolve();
+    _file = ThumbCache.peek(widget.url);
+    if (_file == null) _resolve();
   }
 
   @override
   void didUpdateWidget(covariant _CachedNet old) {
     super.didUpdateWidget(old);
     if (old.url != widget.url) {
-      _file = null;
+      _file = ThumbCache.peek(widget.url);
       _failed = false;
-      _resolve();
+      _retries = 0;
+      if (_file == null) _resolve();
     }
   }
 
@@ -65,6 +68,11 @@ class _CachedNetState extends State<_CachedNet> {
       _file = f;
       _failed = f == null;
     });
+    if (f == null && _retries < 3) {
+      _retries++;
+      await Future<void>.delayed(Duration(seconds: 3 * _retries));
+      if (mounted && url == widget.url && _file == null) _resolve();
+    }
   }
 
   @override

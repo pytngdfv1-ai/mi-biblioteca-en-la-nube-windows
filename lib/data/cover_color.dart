@@ -9,6 +9,10 @@ import 'fetch_bytes.dart';
 class CoverColor {
   static final Map<String, Color?> _cache = {};
 
+  /// Color ya calculado (sin esperar), o null si aún no se conoce.
+  static Color? peek(String? url) => url == null ? null : _cache[url];
+  static List<Color>? peekEdges(String? url) => url == null ? null : _edgeCache[url];
+
   static Future<Color?> of(String? url) async {
     if (url == null) return null;
     if (_cache.containsKey(url)) return _cache[url];
@@ -39,6 +43,44 @@ class CoverColor {
       return null; // sin conexión o imagen inválida: se usa el fondo normal
     }
     _cache[url] = out;
+    return out;
+  }
+
+  static final Map<String, List<Color>?> _edgeCache = {};
+
+  /// Colores medios del borde superior e inferior de la portada: [arriba, abajo].
+  static Future<List<Color>?> edges(String? url) async {
+    if (url == null) return null;
+    if (_edgeCache.containsKey(url)) return _edgeCache[url];
+    List<Color>? out;
+    try {
+      final Uint8List bytes = await fetchBytes(url);
+      final codec = await ui.instantiateImageCodec(bytes, targetWidth: 32, targetHeight: 32);
+      final img = (await codec.getNextFrame()).image;
+      final data = await img.toByteData(format: ui.ImageByteFormat.rawRgba);
+      final w = img.width, h = img.height;
+      img.dispose();
+      if (data != null && h >= 3) {
+        Color rows(int from, int to) {
+          var r = 0, g = 0, b = 0, n = 0;
+          for (var y = from; y < to; y++) {
+            for (var x = 0; x < w; x++) {
+              final i = (y * w + x) * 4;
+              r += data.getUint8(i);
+              g += data.getUint8(i + 1);
+              b += data.getUint8(i + 2);
+              n++;
+            }
+          }
+          return Color.fromARGB(255, (r / n).round(), (g / n).round(), (b / n).round());
+        }
+
+        out = [rows(0, 2), rows(h - 2, h)];
+      }
+    } catch (_) {
+      return null;
+    }
+    _edgeCache[url] = out;
     return out;
   }
 

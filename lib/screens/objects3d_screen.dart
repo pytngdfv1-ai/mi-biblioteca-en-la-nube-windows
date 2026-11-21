@@ -15,6 +15,7 @@ class Objects3DScreen extends StatefulWidget {
 }
 
 class _Objects3DScreenState extends State<Objects3DScreen> {
+  bool _redo = false;
   late Set<String> _sel = {...Objects3D.selected.value};
   bool _busy = false;
   int _done = 0, _total = 0;
@@ -37,7 +38,7 @@ class _Objects3DScreenState extends State<Objects3DScreen> {
 
   Future<void> _run() async {
     final list = _all;
-    final todo = [for (final v in list) if (_sel.contains(v.id) && !Objects3D.has(v.id)) v];
+    final todo = [for (final v in list) if (_sel.contains(v.id) && (_redo || !Objects3D.has(v.id))) v];
     final drop = [for (final v in list) if (!_sel.contains(v.id) && Objects3D.has(v.id)) v];
     await Objects3D.setSelected(_sel);
     Objects3D.cancel = false;
@@ -133,7 +134,15 @@ class _Objects3DScreenState extends State<Objects3DScreen> {
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(12),
-              child: SizedBox(
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                SwitchListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Rehacer también los ya listos'),
+                  value: _redo,
+                  onChanged: _busy ? null : (x) => setState(() => _redo = x),
+                ),
+                SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
                   onPressed: _busy ? null : _run,
@@ -141,6 +150,7 @@ class _Objects3DScreenState extends State<Objects3DScreen> {
                   label: const Text('Generar y guardar en la nube'),
                 ),
               ),
+              ]),
             ),
           ),
         ],

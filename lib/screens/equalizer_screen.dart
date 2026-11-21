@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../data/equalizer.dart';
@@ -86,7 +88,7 @@ class _EqualizerScreenState extends State<EqualizerScreen> {
                                 Text(on ? 'ON' : 'OFF',
                                     style: const TextStyle(color: Color(0xFF22252B), fontWeight: FontWeight.w700, fontSize: 12)),
                                 const Spacer(),
-                                _Meter(level: on ? (g(0).abs() + g(n - 1).abs()) / (2 * pr.maxDecibels) : 0),
+                                _Needle(level: on ? (g(0).abs() + g(n - 1).abs()) / (2 * pr.maxDecibels) : 0),
                               ],
                             ),
                             const SizedBox(height: 10),
@@ -189,29 +191,48 @@ class _EqualizerScreenState extends State<EqualizerScreen> {
   }
 }
 
-class _Meter extends StatelessWidget {
-  const _Meter({required this.level});
+/// Medidor analógico con aguja (nivel 0 a 1).
+class _Needle extends StatelessWidget {
+  const _Needle({required this.level});
   final double level;
 
   @override
   Widget build(BuildContext context) {
-    final lit = (level.clamp(0.0, 1.0) * 10).round();
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: const Color(0xFF14161C), borderRadius: BorderRadius.circular(4)),
-      child: Row(
-        children: [
-          for (var i = 0; i < 10; i++)
-            Container(
-              width: 6,
-              height: 10,
-              margin: const EdgeInsets.symmetric(horizontal: 1),
-              color: i < lit
-                  ? (i < 6 ? const Color(0xFF45E08A) : (i < 8 ? const Color(0xFFE6C34A) : const Color(0xFFE0453A)))
-                  : const Color(0xFF2A2D34),
-            ),
-        ],
-      ),
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: level.clamp(0.0, 1.0)),
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.elasticOut,
+      builder: (_, v, __) => CustomPaint(size: const Size(84, 46), painter: _NeedlePainter(v)),
     );
   }
+}
+
+class _NeedlePainter extends CustomPainter {
+  _NeedlePainter(this.v);
+  final double v;
+
+  @override
+  void paint(Canvas c, Size s) {
+    final r = RRect.fromRectAndRadius(Offset.zero & s, const Radius.circular(6));
+    c.drawRRect(r, Paint()..shader = const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFFF4EBCF), Color(0xFFD9CCA3)]).createShader(r.outerRect));
+    c.drawRRect(r, Paint()..style = PaintingStyle.stroke..strokeWidth = 1.5..color = const Color(0xFF14161C));
+    final pivot = Offset(s.width / 2, s.height * 1.02);
+    final rad = s.height * .86;
+    const a0 = -2.35, a1 = -0.79; // arco de la escala
+    for (var i = 0; i <= 10; i++) {
+      final a = a0 + (a1 - a0) * i / 10;
+      final hot = i >= 8;
+      c.drawLine(pivot + Offset(math.cos(a), math.sin(a)) * rad * .88, pivot + Offset(math.cos(a), math.sin(a)) * rad,
+          Paint()..strokeWidth = i % 5 == 0 ? 1.6 : .8..color = hot ? const Color(0xFFC0392B) : const Color(0xFF22252B));
+    }
+    final a = a0 + (a1 - a0) * v;
+    c.save();
+    c.clipRRect(r);
+    c.drawLine(pivot, pivot + Offset(math.cos(a), math.sin(a)) * rad * .95, Paint()..strokeWidth = 1.6..strokeCap = StrokeCap.round..color = const Color(0xFF111111));
+    c.restore();
+    c.drawCircle(Offset(s.width / 2, s.height - 2), 4, Paint()..color = const Color(0xFF22252B));
+  }
+
+  @override
+  bool shouldRepaint(covariant _NeedlePainter o) => o.v != v;
 }

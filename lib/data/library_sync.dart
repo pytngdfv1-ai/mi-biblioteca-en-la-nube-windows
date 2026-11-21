@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
@@ -12,6 +13,11 @@ import 'vinyl_store.dart';
 class LibrarySync {
   /// Mensaje mientras se sincroniza en segundo plano (null = inactivo).
   static final ValueNotifier<String?> busy = ValueNotifier<String?>(null);
+  /// Avance real de la sincronización al abrir (0 a 1) y paso actual.
+  static final ValueNotifier<double> progress = ValueNotifier<double>(0);
+  static final ValueNotifier<String> step = ValueNotifier<String>('');
+  /// Discos nuevos detectados en la última sincronización al abrir.
+  static final ValueNotifier<int> newCount = ValueNotifier<int>(0);
   static bool _running = false;
 
   /// Sincroniza una cuenta y devuelve un resumen. Lanza si no puede conectar.
@@ -56,20 +62,37 @@ class LibrarySync {
 
   /// Sincroniza todas las cuentas guardadas (al abrir la app).
   static Future<void> syncAll(VinylStore store) async {
-    if (_running || KoofrAccounts.list.isEmpty) return;
+    if (_running || KoofrAccounts.list.isEmpty) {
+      progress.value = 1;
+      return;
+    }
     _running = true;
+    final before = {for (final v in store.items) v.id};
     try {
-      for (final a in List.of(KoofrAccounts.list)) {
+      final list = List.of(KoofrAccounts.list);
+      for (var i = 0; i < list.length; i++) {
+        final a = list[i];
         busy.value = 'Sincronizando ${a.name}…';
+        step.value = 'Sincronizando ${a.name} (${i + 1}/${list.length})';
+        var calls = 0;
         try {
-          await syncAccount(a, store, keepIfEmpty: true);
+          await syncAccount(a, store, keepIfEmpty: true, onProgress: (_) {
+            calls++;
+            progress.value = (i + (1 - math.exp(-calls / 30))) / list.length;
+          });
         } catch (_) {
           // Sin conexión o contraseña cambiada: se conserva lo guardado.
         }
+        progress.value = (i + 1) / list.length;
       }
     } finally {
+      if (before.isNotEmpty) {
+        newCount.value = store.items.where((v) => v.owned && v.trackUrls.isNotEmpty && !before.contains(v.id)).length;
+      }
       _running = false;
       busy.value = null;
+      progress.value = 1;
+      step.value = 'Listo';
     }
   }
 }

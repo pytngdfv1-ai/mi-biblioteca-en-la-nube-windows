@@ -38,7 +38,19 @@ class ThumbCache {
   }
 
   /// Miniatura en disco (la descarga si hace falta). null si no se pudo.
-  static Future<File?> get(String url) => _pending.putIfAbsent(url, () => _load(url).whenComplete(() => _pending.remove(url)));
+  static final Map<String, File> _ready = {};
+
+  /// Miniatura ya resuelta en memoria (evita el parpadeo al reconstruir tarjetas).
+  static File? peek(String url) => _ready[url];
+
+  static Future<File?> get(String url) {
+    final r = _ready[url];
+    if (r != null) return Future.value(r);
+    return _pending.putIfAbsent(url, () => _load(url).then((f) {
+          if (f != null) _ready[url] = f;
+          return f;
+        }).whenComplete(() => _pending.remove(url)));
+  }
 
   static Future<File?> _load(String url) async {
     try {
@@ -46,11 +58,20 @@ class ThumbCache {
       if (await f.exists() && await f.length() > 100) return f;
       await _slot();
       try {
-        final res = await http.get(Uri.parse(url), headers: KoofrSettings.headersFor(url)).timeout(const Duration(seconds: 25));
-        if (res.statusCode != 200 || res.bodyBytes.length < 200) return null;
-        final out = await compute(_shrink, res.bodyBytes);
-        await f.writeAsBytes(out, flush: true);
-        return f;
+        final uri = Uri.tryParse(url) ?? Uri.parse(Uri.encodeFull(url));
+        for (var n = 0; n < 3; n++) {
+          try {
+            final res = await http.get(uri, headers: KoofrSettings.headersFor(url)).timeout(Duration(seconds: 30 + 20 * n));
+            if (res.statusCode == 200 && res.bodyBytes.length >= 200) {
+              final out = await compute(_shrink, res.bodyBytes);
+              await f.writeAsBytes(out, flush: true);
+              return f;
+            }
+            if (res.statusCode == 404 || res.statusCode == 403) return null;
+          } catch (_) {}
+          await Future<void>.delayed(Duration(milliseconds: 600 * (n + 1)));
+        }
+        return null;
       } finally {
         _release();
       }

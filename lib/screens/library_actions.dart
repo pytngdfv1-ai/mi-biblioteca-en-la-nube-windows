@@ -12,6 +12,7 @@ import '../data/play_mode.dart';
 import 'reel_screen.dart';
 import 'cloud_explorer_screen.dart';
 import 'stage_screen.dart';
+import 'cover_suggest_screen.dart';
 import 'objects3d_screen.dart';
 
 /// Abre la pantalla del disco (tocadisco, deck o cinta abierta, según el reproductor elegido).
@@ -86,6 +87,14 @@ Future<void> showLibrarySettings(BuildContext context, {VinylStore? store}) asyn
             ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.image_search),
+              title: const Text('Portadas sugeridas'),
+              subtitle: const Text('Guarda en la carpeta la portada incrustrada o encontrada', style: TextStyle(fontSize: 12)),
+              onTap: () => Navigator.of(ctx).push(MaterialPageRoute<void>(builder: (_) => CoverSuggestScreen(store: store!))),
+            ),
+            ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.view_in_ar),
               title: const Text('Objetos 3D'),
               subtitle: const Text('Elige discos y cassettes: trasera y etiqueta', style: TextStyle(fontSize: 12)),
@@ -120,6 +129,25 @@ Future<void> showLibrarySettings(BuildContext context, {VinylStore? store}) asyn
                 UiSettings.setLib(x);
                 setLocal(() {});
               },
+            ),
+            ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Color del tocadiscos'),
+              subtitle: Wrap(
+                spacing: 6,
+                children: [
+                  for (var i = 0; i < UiSettings.plinthNames.length; i++)
+                    ChoiceChip(
+                      label: Text(UiSettings.plinthNames[i]),
+                      selected: UiSettings.plinth.value == i,
+                      onSelected: (_) {
+                        UiSettings.setPlinth(i);
+                        setLocal(() {});
+                      },
+                    ),
+                ],
+              ),
             ),
             SwitchListTile(
               dense: true,
