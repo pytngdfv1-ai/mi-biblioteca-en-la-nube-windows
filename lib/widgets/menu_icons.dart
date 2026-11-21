@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'spin_model.dart';
 
-enum MenuIconKind { turntable, deck, dj, reel, equalizer, gear, covers, search }
+enum MenuIconKind { turntable, deck, dj, reel, equalizer, gear, covers, search, ipod }
 
 /// Icono 3D del carrusel principal: objeto dibujado con volumen, luz y sombra, sin recuadro.
 class MenuIconCard extends StatelessWidget {
@@ -75,6 +75,8 @@ class _IconPainter extends CustomPainter {
         _covers(c);
       case MenuIconKind.search:
         _search(c);
+      case MenuIconKind.ipod:
+        _ipod(c);
     }
   }
 
@@ -428,6 +430,18 @@ class _IconPainter extends CustomPainter {
       c.drawCircle(Offset(79, y), 1.1, Paint()..color = const Color(0xFF7A7A80));
     }
     _text(c, 'FOUR TRACK STEREOPHONIC', const Offset(50, 85.2), 2.4, const Color(0xFF4A4741));
+  }
+
+  void _ipod(Canvas c) {
+    _ground(c, 50, 92, 22, 4);
+    final body = RRect.fromRectAndRadius(const Rect.fromLTWH(30, 10, 40, 80), const Radius.circular(8));
+    c.drawRRect(body, Paint()..shader = const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFFF4F4F6), Color(0xFFB6B8C0)]).createShader(body.outerRect));
+    final scr = RRect.fromRectAndRadius(const Rect.fromLTWH(35, 15, 30, 24), const Radius.circular(2));
+    c.drawRRect(scr, Paint()..shader = const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFFE2EFF3), Color(0xFF9FBAC4)]).createShader(scr.outerRect));
+    c.drawRect(const Rect.fromLTWH(38, 30, 24, 3), Paint()..color = const Color(0xFF2B79C2));
+    c.drawCircle(const Offset(50, 64), 16, Paint()..shader = const RadialGradient(colors: [Color(0xFFFFFFFF), Color(0xFFCDCED4)]).createShader(Rect.fromCircle(center: const Offset(50, 64), radius: 16)));
+    c.drawCircle(const Offset(50, 64), 5.5, Paint()..color = const Color(0xFFD9DADF));
+    c.drawCircle(const Offset(50, 64), 5.5, Paint()..style = PaintingStyle.stroke..strokeWidth = .8..color = const Color(0x33000000));
   }
 
   void _eq(Canvas c) {

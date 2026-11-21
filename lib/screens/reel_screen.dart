@@ -78,7 +78,10 @@ class _ReelScreenState extends State<ReelScreen> with SingleTickerProviderStateM
   Widget _scaffold(Vinyl v, Color bg) {
     return Scaffold(
       backgroundColor: bg,
-      appBar: AppBar(backgroundColor: bg, title: Text(v.title, maxLines: 1, overflow: TextOverflow.ellipsis)),
+      appBar: AppBar(
+        backgroundColor: bg,
+        title: Text(v.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+      ),
       body: Column(
         children: [
           AspectRatio(

@@ -1,4 +1,4 @@
-enum PlayMode { disc, cassette, reel }
+enum PlayMode { disc, cassette, reel, ipod }
 
 /// Reproductor en el que se está navegando: cambia cómo se ve y suena cada elemento.
 /// null = según lo que sea cada elemento (disco, cassette o tema suelto).

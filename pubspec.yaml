@@ -40,6 +40,9 @@ flutter:
     - assets/models3d/dj/
     - assets/models3d/melodia/
     - assets/models3d/crate/
+    - assets/models3d/ipod/
+    - assets/models3d/gear/
+    - assets/models3d/lupa/
   shaders:
     - shaders/vinyl_sheen.frag
   fonts:
