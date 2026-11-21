@@ -130,6 +130,7 @@ class _LibraryRingState extends State<LibraryRing> {
                     count: slice.length,
                     initial: _focus < 0 ? 0 : _focus,
                     aspect: allCassette ? 0.63 : 1.0,
+                    scale: 2.0,
                     itemBuilder: (_, i) {
                       final v = slice[i];
                       return (v.isTape)

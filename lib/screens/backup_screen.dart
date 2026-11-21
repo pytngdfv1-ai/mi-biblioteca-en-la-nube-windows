@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../data/auto_backup.dart';
 import '../data/backup.dart';
 import '../data/vinyl_store.dart';
 
@@ -146,7 +147,30 @@ class _BackupScreenState extends State<BackupScreen> {
             label: const Text('Importar copia'),
             onPressed: _busy ? null : _import,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+          ValueListenableBuilder<bool>(
+            valueListenable: AutoBackup.enabled,
+            builder: (_, on, __) => SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Guardar copia automática en la nube'),
+              subtitle: ValueListenableBuilder<String>(
+                valueListenable: AutoBackup.status,
+                builder: (_, s, __) => Text(s.isEmpty ? 'Tras cada cambio, en la carpeta _respaldo' : s),
+              ),
+              value: on,
+              onChanged: _busy
+                  ? null
+                  : (x) async {
+                      if (x) {
+                        final pw = await _ask('Clave para cifrar la copia', confirm: true);
+                        if (pw != null) await AutoBackup.enable(pw);
+                      } else {
+                        await AutoBackup.disable();
+                      }
+                    },
+            ),
+          ),
+          const SizedBox(height: 4),
           if (_busy) const LinearProgressIndicator(),
           const SizedBox(height: 8),
           Text(_status),

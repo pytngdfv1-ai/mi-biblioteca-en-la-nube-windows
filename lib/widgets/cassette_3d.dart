@@ -61,6 +61,9 @@ class _Cassette3DState extends State<Cassette3D> {
         final t = ww * 0.2;
         return FutureBuilder<List<Color?>>(
           future: _colors,
+          initialData: (CoverColor.peek(widget.vinyl.coverUrl) != null || CoverColor.peek(_back) != null)
+              ? [CoverColor.peek(widget.vinyl.coverUrl), CoverColor.peek(_back)]
+              : null,
           builder: (context, snap) {
             final a = snap.data?[0] ?? hueColor;
             final b = snap.data?[1] ?? Color.lerp(a, Colors.black, 0.4)!;

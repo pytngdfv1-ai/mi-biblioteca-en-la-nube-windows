@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import '../audio/player_service.dart';
 import '../data/cajon.dart';
 import '../data/library_sync.dart';
+import '../data/tilt.dart';
 import '../data/vinyl_store.dart';
 import 'cover_studio_screen.dart';
+import 'cover_suggest_screen.dart';
 import 'equalizer_screen.dart';
 import 'mode_screen.dart';
 import '../data/play_mode.dart';
@@ -42,6 +44,34 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  VoidCallback? _releaseTilt;
+
+  @override
+  void initState() {
+    super.initState();
+    _releaseTilt = Tilt.instance.acquire();
+    LibrarySync.newCount.addListener(_announceNew);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _announceNew());
+  }
+
+  void _announceNew() {
+    final n = LibrarySync.newCount.value;
+    if (n <= 0 || !mounted) return;
+    LibrarySync.newCount.value = 0;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      duration: const Duration(seconds: 8),
+      content: Text(n == 1 ? '1 disco nuevo en tu nube' : '$n discos nuevos en tu nube'),
+      action: SnackBarAction(label: 'Ver portadas', onPressed: () => _push(CoverSuggestScreen(store: widget.store))),
+    ));
+  }
+
+  @override
+  void dispose() {
+    LibrarySync.newCount.removeListener(_announceNew);
+    _releaseTilt?.call();
+    super.dispose();
+  }
+
   Future<void> _push(Widget page) async {
     await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
     if (mounted) setState(() {});
@@ -79,52 +109,61 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /// Menú principal en anillo 360°: solo iconos 3D.
-  Widget _ring(List<Cajon> cajones, List<Vinyl> all) {
-    const items = <(String, String, MenuIconKind)>[
-      ('Tocadiscos', 'Álbumes y sueltos en disco', MenuIconKind.turntable),
-      ('Deck de cassettes', 'Álbumes y sueltos en cassette', MenuIconKind.deck),
-      ('Bandejas DJ', 'Mezcla tus playlists', MenuIconKind.dj),
-      ('Cinta abierta', 'Reproduce todo', MenuIconKind.reel),
-      ('Buscador de portadas', 'Cover Studio', MenuIconKind.covers),
-      ('Buscador de temas y álbumes', 'Busca en tu biblioteca', MenuIconKind.search),
-      ('Ajustes', 'Opciones de la app', MenuIconKind.gear),
-      ('Ecualizador', 'Graves, medios y agudos', MenuIconKind.equalizer),
-    ];
-    void tool(int i) {
-      switch (i) {
-        case 0:
-          _push(ModeScreen(store: widget.store, mode: PlayMode.disc));
-        case 1:
-          _push(ModeScreen(store: widget.store, mode: PlayMode.cassette));
-        case 2:
-          _push(const PlaylistsScreen());
-        case 3:
-          _push(ModeScreen(store: widget.store, mode: PlayMode.reel));
-        case 4:
-          _push(CoverStudioScreen(store: widget.store));
-        case 5:
-          _push(SearchScreen(store: widget.store));
-        case 6:
-          showLibrarySettings(context, store: widget.store);
-        default:
-          _push(const EqualizerScreen());
-      }
+  static const _menuItems = <(String, String, MenuIconKind)>[
+    ('Tocadiscos', 'Álbumes y sueltos en disco', MenuIconKind.turntable),
+    ('Deck de cassettes', 'Álbumes y sueltos en cassette', MenuIconKind.deck),
+    ('Bandejas DJ', 'Mezcla tus playlists', MenuIconKind.dj),
+    ('Cinta abierta', 'Reproduce todo', MenuIconKind.reel),
+    ('Buscador de portadas', 'Cover Studio', MenuIconKind.covers),
+    ('Buscador de temas y álbumes', 'Busca en tu biblioteca', MenuIconKind.search),
+    ('Ajustes', 'Opciones de la app', MenuIconKind.gear),
+    ('Ecualizador', 'Graves, medios y agudos', MenuIconKind.equalizer),
+  ];
+  void _tool(int i) {
+    switch (i) {
+      case 0:
+        _push(ModeScreen(store: widget.store, mode: PlayMode.disc));
+      case 1:
+        _push(ModeScreen(store: widget.store, mode: PlayMode.cassette));
+      case 2:
+        _push(const PlaylistsScreen());
+      case 3:
+        _push(ModeScreen(store: widget.store, mode: PlayMode.reel));
+      case 4:
+        _push(CoverStudioScreen(store: widget.store));
+      case 5:
+        _push(SearchScreen(store: widget.store));
+      case 6:
+        showLibrarySettings(context, store: widget.store);
+      default:
+        _push(const EqualizerScreen());
     }
+  }
 
-    const models3d = ['technics', 'cassette_player', 'dj', 'melodia', 'crate'];
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(0, -0.1),
-          radius: 1.0,
-          colors: [Color(0xFF1B1B22), Color(0xFF050507)],
+  static const _models3d = ['technics', 'cassette_player', 'dj', 'melodia', 'crate'];
+
+  Widget _ring(List<Cajon> cajones, List<Vinyl> all) {
+    const items = _menuItems;
+    final tool = _tool;
+    const models3d = _models3d;
+    // Paralaje: el fondo se desplaza un poco con la inclinación del equipo.
+    return ValueListenableBuilder<Offset>(
+      valueListenable: Tilt.instance.value,
+      builder: (_, t, child) => Container(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(t.dx * -0.35, -0.1 + t.dy * 0.35),
+            radius: 1.0,
+            colors: const [Color(0xFF1B1B22), Color(0xFF050507)],
+          ),
         ),
+        child: child,
       ),
       child: Ring360(
         count: items.length,
         aspect: 0.9,
-        gap: 1.7,
-        scale: 0.92,
+        gap: 2.3,
+        scale: 2.2,
         itemBuilder: (_, i) => MenuIconCard(kind: items[i].$3, label: items[i].$1),
         frontAwareBuilder: (_, i, isFront) => MenuIconCard(
           kind: items[i].$3,
@@ -153,15 +192,19 @@ class _HomeScreenState extends State<HomeScreen> {
           appBar: AppBar(
             backgroundColor: AppColors.ink,
             title: const Text('Mi Biblioteca'),
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(2),
-              child: ValueListenableBuilder<String?>(
-                valueListenable: LibrarySync.busy,
-                builder: (_, m, __) =>
-                    m == null ? const SizedBox(height: 2) : const LinearProgressIndicator(minHeight: 2),
-              ),
-            ),
             actions: [
+              ValueListenableBuilder<String?>(
+                valueListenable: LibrarySync.busy,
+                builder: (_, m, __) => m == null
+                    ? const SizedBox.shrink()
+                    : Tooltip(
+                        message: m,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                        ),
+                      ),
+              ),
               ValueListenableBuilder<bool>(
                 valueListenable: UiSettings.homeRing,
                 builder: (_, ring, __) => IconButton(
@@ -232,46 +275,39 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          body: cajones.isEmpty && !UiSettings.homeRing.value
-              ? const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Text(
-                      'Aún no hay bibliotecas\nToca + y conecta Koofr o elige una carpeta',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white70),
-                    ),
+          body: ValueListenableBuilder<bool>(
+            valueListenable: UiSettings.homeRing,
+            builder: (context, ring, _) => ring
+                ? _ring(cajones, all)
+                : ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: 1,
+                        crossAxisSpacing: 14,
+                        mainAxisSpacing: 18,
+                        childAspectRatio: 1.05,
+                        children: [
+                          for (var i = 0; i < _menuItems.length; i++)
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => _tool(i),
+                              child: IgnorePointer(
+                                child: MenuIconCard(
+                                  kind: _menuItems[i].$3,
+                                  label: _menuItems[i].$1,
+                                  model: i < _models3d.length ? _models3d[i] : null,
+                                  front: false,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
                   ),
-                )
-              : ValueListenableBuilder<bool>(
-                  valueListenable: UiSettings.homeRing,
-                  builder: (context, ring, _) => ring ? _ring(cajones, all) : GridView.count(
-                  crossAxisCount: 2,
-                  padding: const EdgeInsets.all(16),
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 20,
-                  childAspectRatio: 0.92,
-                  children: [
-                    for (final c in cajones)
-                      if (c.kind == CajonKind.covers || c.kind == CajonKind.singles)
-                        _CabinetTile(
-                          label: c.name,
-                          covers: all.where(c.matches).toList()
-                            ..sort((a, b) => a.artist.toLowerCase().compareTo(b.artist.toLowerCase())),
-                          onTap: () => _openCajon(c),
-                          onLongPress: () => _rename(c),
-                        )
-                      else
-                        _CrateTile(
-                          label: c.name,
-                          count: all.where(c.matches).length,
-                          singles: c.kind == CajonKind.singles,
-                          covers: all.where(c.matches).toList(),
-                          onTap: () => _openCajon(c),
-                          onLongPress: () => _rename(c),
-                        ),
-                  ],
-                )),
+          ),
           bottomNavigationBar: ValueListenableBuilder<Vinyl?>(
             valueListenable: PlayerService.instance.nowPlaying,
             builder: (_, v, __) => v == null

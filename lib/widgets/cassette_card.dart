@@ -15,12 +15,12 @@ class CassetteCard extends StatefulWidget {
 }
 
 class _CassetteCardState extends State<CassetteCard> {
-  late Future<Color?> _color = CoverColor.of(widget.vinyl.coverUrl);
+  late Future<List<Color>?> _color = CoverColor.edges(widget.vinyl.coverUrl);
 
   @override
   void didUpdateWidget(covariant CassetteCard old) {
     super.didUpdateWidget(old);
-    if (old.vinyl.coverUrl != widget.vinyl.coverUrl) _color = CoverColor.of(widget.vinyl.coverUrl);
+    if (old.vinyl.coverUrl != widget.vinyl.coverUrl) _color = CoverColor.edges(widget.vinyl.coverUrl);
   }
 
   @override
@@ -30,11 +30,12 @@ class _CassetteCardState extends State<CassetteCard> {
     return Center(
       child: AspectRatio(
         aspectRatio: 0.63,
-        child: FutureBuilder<Color?>(
+        child: FutureBuilder<List<Color>?>(
           future: _color,
+          initialData: CoverColor.peekEdges(widget.vinyl.coverUrl),
           builder: (context, snap) {
-            final base = snap.data ?? hueColor;
-            final dark = Color.lerp(base, Colors.black, 0.45)!;
+            final topC = snap.data?[0] ?? hueColor;
+            final botC = snap.data?[1] ?? hueColor;
             Widget fill(bool top, String text, {bool bold = false}) => Expanded(
                   child: Container(
                     alignment: top ? Alignment.bottomCenter : Alignment.topCenter,
@@ -43,7 +44,7 @@ class _CassetteCardState extends State<CassetteCard> {
                       gradient: LinearGradient(
                         begin: top ? Alignment.topCenter : Alignment.bottomCenter,
                         end: top ? Alignment.bottomCenter : Alignment.topCenter,
-                        colors: [dark, base],
+                        colors: [Color.lerp(top ? topC : botC, Colors.black, 0.3)!, top ? topC : botC],
                       ),
                     ),
                     child: Text(

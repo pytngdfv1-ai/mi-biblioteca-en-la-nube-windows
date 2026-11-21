@@ -128,7 +128,7 @@ class _Ring360State extends State<Ring360> with SingleTickerProviderStateMixin {
       builder: (context, cons) {
         final w = cons.maxWidth;
         final h = cons.maxHeight;
-        final ch = math.min(h * 0.58, w * 0.52 / widget.aspect) * widget.scale;
+        final ch = math.min(math.min(h * 0.58, w * 0.52 / widget.aspect) * widget.scale, math.min(h * 0.92, w * 0.94 / widget.aspect));
         final cw = ch * widget.aspect;
         final cx = w / 2;
         final cy = h * 0.44;

@@ -30,6 +30,7 @@ import '../widgets/open_animation.dart';
 import '../widgets/wear_painter.dart';
 import '../widgets/turntable.dart';
 import '../theme.dart';
+import '../widgets/cover_tint.dart';
 import 'booklet_screen.dart';
 import 'lyrics_sheet.dart';
 import 'move_dialog.dart';
@@ -346,8 +347,12 @@ class _StageScreenState extends State<StageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return CoverTint(url: v.coverUrl, base: AppColors.ink, builder: (context, bg) => _scaffold(bg));
+  }
+
+  Widget _scaffold(Color bg) {
     return Scaffold(
-      backgroundColor: AppColors.ink,
+      backgroundColor: bg,
       body: Stack(children: [
         _stageBody(),
         if (_anim || _ejecting)

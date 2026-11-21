@@ -297,6 +297,7 @@ class _DiscLabelState extends State<DiscLabel> {
     final fallbackColor = hueColor(v.hue, 0.6, 0.42);
     return FutureBuilder<Color?>(
       future: _color,
+      initialData: CoverColor.peek(v.coverUrl),
       builder: (context, snap) {
         final base = snap.data ?? fallbackColor;
         final dark = base.computeLuminance() < 0.5;

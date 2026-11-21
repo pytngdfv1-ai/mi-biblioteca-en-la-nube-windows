@@ -2,9 +2,12 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import '../platform/haptic.dart';
+
+import '../data/ui_settings.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 
+import '../data/cover_color.dart';
 import '../models/vinyl.dart';
 import 'vinyl_disc.dart';
 
@@ -196,6 +199,22 @@ class _TurntableState extends State<Turntable> with TickerProviderStateMixin {
     });
   }
 
+  List<Color>? _tint;
+  String? _tintUrl;
+
+  List<Color>? _tintFor() {
+    if (UiSettings.plinth.value != UiSettings.plinthCover) return null;
+    final url = widget.vinyl.coverUrl;
+    if (_tintUrl != url) {
+      _tintUrl = url;
+      _tint = null;
+      CoverColor.of(url).then((c) {
+        if (c != null && mounted && _tintUrl == url) setState(() => _tint = UiSettings.tintFrom(c));
+      });
+    }
+    return _tint;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -273,7 +292,10 @@ class _TurntableState extends State<Turntable> with TickerProviderStateMixin {
             child: Stack(
             children: [
               Positioned.fill(
-                child: CustomPaint(painter: _DiscPainter(scale: widget.scale)),
+                child: ValueListenableBuilder<int>(
+                  valueListenable: UiSettings.plinth,
+                  builder: (_, __, ___) => CustomPaint(painter: _DiscPainter(scale: widget.scale, tint: _tintFor())),
+                ),
               ),
               if (widget.showDisc)
                 Positioned(
@@ -326,9 +348,10 @@ class _TurntableState extends State<Turntable> with TickerProviderStateMixin {
 
 /// Base, plato, disco con reflejos y control de velocidad.
 class _DiscPainter extends CustomPainter {
-  _DiscPainter({required this.scale});
+  _DiscPainter({required this.scale, this.tint});
 
   final double scale;
+  final List<Color>? tint;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -341,10 +364,10 @@ class _DiscPainter extends CustomPainter {
     canvas.drawRRect(
       base,
       Paint()
-        ..shader = const LinearGradient(
+        ..shader = LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF3A2A1E), Color(0xFF241A13), Color(0xFF2E2118)],
+          colors: tint ?? UiSettings.plinthColors,
         ).createShader(Offset.zero & size),
     );
     canvas.save();
@@ -428,7 +451,7 @@ class _DiscPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _DiscPainter old) => old.scale != scale;
+  bool shouldRepaint(covariant _DiscPainter old) => old.scale != scale || old.tint != tint;
 }
 
 /// Eje central, base del brazo, brazo curvo con contrapeso y cápsula.

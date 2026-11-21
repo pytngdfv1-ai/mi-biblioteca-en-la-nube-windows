@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 
 import '../audio/player_service.dart';
 import '../models/vinyl.dart';
+import '../widgets/cover_tint.dart';
 import '../theme.dart';
 
 /// Reproductor de cinta abierta (carrete): reproduce cualquier álbum o suelto.
@@ -22,7 +23,7 @@ class _ReelScreenState extends State<ReelScreen> with SingleTickerProviderStateM
   final _ps = PlayerService.instance;
   late final Ticker _tick;
   Duration _last = Duration.zero;
-  double _angle = 0;
+  double _angle = 0, _angleR = 0;
   double _speed = 0;
   double _vu = 0;
   final _t = ValueNotifier<int>(0);
@@ -49,7 +50,12 @@ class _ReelScreenState extends State<ReelScreen> with SingleTickerProviderStateM
     _last = d;
     final playing = _ps.player.playing && _ps.nowPlaying.value?.id == widget.vinyl.id;
     _speed += ((playing ? 1.0 : 0.0) - _speed) * math.min(1.0, dt * 2.5);
-    _angle += _speed * dt * 3.2;
+    // Velocidad real: la cinta pasa a ritmo constante, así que el carrete casi vacío gira
+    // más rápido que el lleno (radio del paquete de cinta, igual que en el dibujo).
+    final dur = _ps.player.duration?.inMilliseconds ?? 0;
+    final prog = dur > 0 ? (_ps.player.position.inMilliseconds / dur).clamp(0.0, 1.0).toDouble() : 0.0;
+    _angle += _speed * dt * 3.2 * (0.7 / (0.92 - 0.45 * prog));
+    _angleR += _speed * dt * 3.2 * (0.7 / (0.47 + 0.45 * prog));
     final s = d.inMilliseconds / 1000.0;
     final target = playing ? 0.5 + 0.25 * math.sin(s * 7.3) * math.sin(s * 2.1) + 0.15 * math.sin(s * 13.0) : 0.0;
     _vu += (target - _vu) * math.min(1.0, dt * 9);
@@ -66,8 +72,13 @@ class _ReelScreenState extends State<ReelScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final v = widget.vinyl;
+    return CoverTint(url: v.coverUrl, base: const Color(0xFF121216), builder: (context, bg) => _scaffold(v, bg));
+  }
+
+  Widget _scaffold(Vinyl v, Color bg) {
     return Scaffold(
-      appBar: AppBar(title: Text(v.title, maxLines: 1, overflow: TextOverflow.ellipsis)),
+      backgroundColor: bg,
+      appBar: AppBar(backgroundColor: bg, title: Text(v.title, maxLines: 1, overflow: TextOverflow.ellipsis)),
       body: Column(
         children: [
           AspectRatio(
@@ -78,7 +89,7 @@ class _ReelScreenState extends State<ReelScreen> with SingleTickerProviderStateM
                 final dur = _ps.player.duration?.inMilliseconds ?? 0;
                 final pos = _ps.player.position.inMilliseconds;
                 final prog = dur > 0 ? (pos / dur).clamp(0.0, 1.0).toDouble() : 0.0;
-                return CustomPaint(painter: _ReelPainter(_angle, _vu, prog, pos ~/ 1000));
+                return CustomPaint(painter: _ReelPainter(_angle, _angleR, _vu, prog, pos ~/ 1000));
               },
             ),
           ),
@@ -144,8 +155,8 @@ class _ReelScreenState extends State<ReelScreen> with SingleTickerProviderStateM
 }
 
 class _ReelPainter extends CustomPainter {
-  _ReelPainter(this.angle, this.vu, this.progress, this.seconds);
-  final double angle;
+  _ReelPainter(this.angle, this.angleR, this.vu, this.progress, this.seconds);
+  final double angle, angleR;
   final double vu;
   final double progress;
   final int seconds;
@@ -268,7 +279,7 @@ class _ReelPainter extends CustomPainter {
       }
       c.save();
       c.translate(o.dx, o.dy);
-      c.rotate(angle);
+      c.rotate(k == 0 ? angle : angleR);
       for (var i = 0; i < 3; i++) {
         c.rotate(2 * math.pi / 3);
         final lim = (pack / reelR).clamp(0.55, 1.0);

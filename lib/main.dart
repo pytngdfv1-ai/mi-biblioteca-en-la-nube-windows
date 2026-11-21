@@ -1,4 +1,6 @@
 import 'data/objects3d.dart';
+import 'data/auto_backup.dart';
+import 'screens/splash_screen.dart';
 import 'data/equalizer.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
@@ -20,7 +22,6 @@ import 'data/vinyl_store.dart';
 import 'platform/audio_hook.dart';
 import 'platform/desktop_shell.dart';
 import 'platform/updater.dart';
-import 'screens/home_screen.dart';
 import 'theme.dart';
 
 Future<void> main() async {
@@ -52,22 +53,25 @@ Future<void> main() async {
   await BookletLite.load();
   await KoofrAccounts.load();
   await Objects3D.load();
+  await AutoBackup.init(store);
   await Playlists.instance.load();
   try {
     await AppAudio.init();
   } catch (_) {}
   PlayerService.beforeStart = DjSession.stop;
-  runApp(VinylApp(store: store));
-  // Sincroniza las nubes al abrir (en segundo plano).
-  LibrarySync.syncAll(store).whenComplete(() => Objects3D.sync(store.items));
+  // Sincroniza las nubes al abrir (en segundo plano); el inicio espera a que termine.
+  final sync = LibrarySync.syncAll(store);
+  runApp(VinylApp(store: store, ready: sync));
+  sync.whenComplete(() => Objects3D.sync(store.items));
   // Busca actualizaciones en segundo plano.
   initUpdater();
 }
 
 class VinylApp extends StatelessWidget {
-  const VinylApp({super.key, required this.store});
+  const VinylApp({super.key, required this.store, required this.ready});
 
   final VinylStore store;
+  final Future<void> ready;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +86,7 @@ class VinylApp extends StatelessWidget {
         onPointerHover: (e) => Tilt.instance.pointer(e.position, MediaQuery.sizeOf(context)),
         child: DesktopShortcuts(child: child ?? const SizedBox.shrink()),
       ),
-      home: HomeScreen(store: store),
+      home: SplashScreen(store: store, ready: ready),
     );
   }
 }

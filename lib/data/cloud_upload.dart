@@ -91,6 +91,21 @@ class CloudUpload {
       ok ? up++ : skip++;
       done += await f.$1.length();
     }
+    // Verifica que cada archivo en la nube tenga el mismo tamaño que el local antes de dar todo por bueno.
+    onProgress?.call('Verificando…', 1);
+    final byDir = <String, List<(File, List<String>)>>{};
+    for (final f in files) {
+      byDir.putIfAbsent(f.$2.sublist(0, f.$2.length - 1).join('/'), () => []).add(f);
+    }
+    for (final e in byDir.entries) {
+      final sub = e.key.isEmpty ? <String>[] : e.key.split('/');
+      final remote = {for (final c in await client.browse([...base, ...sub])) c.name: c.size};
+      for (final f in e.value) {
+        if (remote[f.$2.last] != await f.$1.length()) {
+          throw KoofrException('La copia de "${f.$2.last}" en la nube no coincide con la del equipo. No se borró nada.');
+        }
+      }
+    }
     onProgress?.call('Listo', 1);
     final first = files.firstWhere((f) => f.$1.path == _file(v.trackUrls.first).path, orElse: () => files.first);
     return UploadResult(up, skip, [...base, ...first.$2].join('/'));
