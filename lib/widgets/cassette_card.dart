@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../data/cover_color.dart';
+import '../data/custom_discs.dart';
 import '../models/vinyl.dart';
 import 'cover_art.dart';
 
 /// Cassette de frente: la portada completa en el centro y, arriba y abajo, relleno con el
 /// color predominante de la portada. Carcasa transparente, solo con un borde fino.
 class CassetteCard extends StatefulWidget {
-  const CassetteCard({super.key, required this.vinyl});
+  const CassetteCard({super.key, required this.vinyl, this.look});
   final Vinyl vinyl;
+  final CustomLook? look;
 
   @override
   State<CassetteCard> createState() => _CassetteCardState();
@@ -34,8 +36,10 @@ class _CassetteCardState extends State<CassetteCard> {
           future: _color,
           initialData: CoverColor.peekEdges(widget.vinyl.coverUrl),
           builder: (context, snap) {
-            final topC = snap.data?[0] ?? hueColor;
-            final botC = snap.data?[1] ?? hueColor;
+            final lk = widget.look ?? CustomDiscs.lookOf(widget.vinyl.id);
+            final tc = (lk != null && lk.tapeColor != 0) ? Color(lk.tapeColor) : null;
+            final topC = tc ?? snap.data?[0] ?? hueColor;
+            final botC = tc ?? snap.data?[1] ?? hueColor;
             Widget fill(bool top, String text, {bool bold = false}) => Expanded(
                   child: Container(
                     alignment: top ? Alignment.bottomCenter : Alignment.topCenter,

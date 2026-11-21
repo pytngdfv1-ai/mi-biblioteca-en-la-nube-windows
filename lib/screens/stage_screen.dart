@@ -31,6 +31,7 @@ import '../widgets/wear_painter.dart';
 import '../widgets/turntable.dart';
 import '../theme.dart';
 import '../widgets/cover_tint.dart';
+import 'back_cover_screen.dart';
 import 'booklet_screen.dart';
 import 'lyrics_sheet.dart';
 import 'move_dialog.dart';
@@ -414,6 +415,11 @@ class _StageScreenState extends State<StageScreen> {
                     onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
                   ),
                   const Spacer(),
+                  IconButton(
+                    tooltip: 'Contraportada',
+                    icon: const Icon(Icons.flip_to_back),
+                    onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => BackCoverScreen(store: widget.store, vinyl: v))),
+                  ),
                   if (v.hasBooklet)
                     IconButton(
                       tooltip: 'Libreto',

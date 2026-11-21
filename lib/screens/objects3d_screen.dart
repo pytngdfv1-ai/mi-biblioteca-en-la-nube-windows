@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/objects3d.dart';
+import '../data/objects3d_queue.dart';
 import '../data/vinyl_store.dart';
 import '../models/vinyl.dart';
 import '../widgets/cover_art.dart';
@@ -17,9 +18,6 @@ class Objects3DScreen extends StatefulWidget {
 class _Objects3DScreenState extends State<Objects3DScreen> {
   bool _redo = false;
   late Set<String> _sel = {...Objects3D.selected.value};
-  bool _busy = false;
-  int _done = 0, _total = 0;
-  String _msg = '';
   int _bytes = 0;
   String _q = '';
 
@@ -29,7 +27,20 @@ class _Objects3DScreenState extends State<Objects3DScreen> {
   void initState() {
     super.initState();
     _size();
+    Objects3DQueue.busy.addListener(_onBusy);
   }
+
+  void _onBusy() {
+    if (!Objects3DQueue.busy.value) _size();
+  }
+
+  @override
+  void dispose() {
+    Objects3DQueue.busy.removeListener(_onBusy);
+    super.dispose();
+  }
+
+  bool get _busy => Objects3DQueue.busy.value;
 
   Future<void> _size() async {
     final b = await Objects3D.size();
@@ -41,32 +52,21 @@ class _Objects3DScreenState extends State<Objects3DScreen> {
     final todo = [for (final v in list) if (_sel.contains(v.id) && (_redo || !Objects3D.has(v.id))) v];
     final drop = [for (final v in list) if (!_sel.contains(v.id) && Objects3D.has(v.id)) v];
     await Objects3D.setSelected(_sel);
-    Objects3D.cancel = false;
-    setState(() {
-      _busy = true;
-      _done = 0;
-      _total = todo.length + drop.length;
-      _msg = '';
-    });
-    for (final v in drop) {
-      if (Objects3D.cancel) break;
-      await Objects3D.remove(v);
-      if (mounted) setState(() => _done++);
+    Objects3DQueue.add(todo: todo, drop: drop);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Se generan en segundo plano; puedes seguir usando la app')),
+      );
     }
-    for (final v in todo) {
-      if (Objects3D.cancel) break;
-      if (mounted) setState(() => _msg = v.title);
-      try {
-        await Objects3D.generate(v);
-      } catch (_) {}
-      if (mounted) setState(() => _done++);
-    }
-    await _size();
-    if (mounted) setState(() => _busy = false);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ValueListenableBuilder<bool>(
+        valueListenable: Objects3DQueue.busy,
+        builder: (_, __, ___) => _page(context),
+      );
+
+  Widget _page(BuildContext context) {
     final all = _all;
     final q = _q.toLowerCase();
     final shown = [for (final v in all) if (q.isEmpty || '${v.artist} ${v.title}'.toLowerCase().contains(q)) v];
@@ -98,22 +98,38 @@ class _Objects3DScreenState extends State<Objects3DScreen> {
               ],
             ),
           ),
-          if (_busy)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
-              child: Column(
-                children: [
-                  LinearProgressIndicator(value: _total == 0 ? null : _done / _total),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Expanded(child: Text('$_done/$_total · $_msg', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12))),
-                      TextButton(onPressed: () => Objects3D.cancel = true, child: const Text('Cancelar')),
-                    ],
+          ValueListenableBuilder<bool>(
+            valueListenable: Objects3DQueue.busy,
+            builder: (_, busy, __) => !busy
+                ? const SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
+                    child: ValueListenableBuilder<int>(
+                      valueListenable: Objects3DQueue.done,
+                      builder: (_, done, __) => ValueListenableBuilder<int>(
+                        valueListenable: Objects3DQueue.total,
+                        builder: (_, total, __) => Column(
+                          children: [
+                            LinearProgressIndicator(value: total == 0 ? null : done / total),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ValueListenableBuilder<String>(
+                                    valueListenable: Objects3DQueue.message,
+                                    builder: (_, m, __) =>
+                                        Text('$done/$total · $m', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                                  ),
+                                ),
+                                TextButton(onPressed: Objects3DQueue.cancel, child: const Text('Cancelar')),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ],
-              ),
-            ),
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: shown.length,

@@ -1,8 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/vinyl.dart';
+import 'custom_discs.dart';
 
-enum CajonKind { albums, singles, covers, unclassified }
+enum CajonKind { albums, singles, covers, unclassified, custom }
 
 /// Un cajón del menú principal: tipo + idioma ("Álbumes en inglés"…).
 class Cajon {
@@ -16,6 +17,7 @@ class Cajon {
   String get key => '${kind.name}_${lang ?? 'x'}';
 
   String get defaultName {
+    if (kind == CajonKind.custom) return 'Personalizados';
     final l = lang == 'en' ? 'inglés' : 'español';
     switch (kind) {
       case CajonKind.albums:
@@ -26,6 +28,8 @@ class Cajon {
         return 'Covers en $l';
       case CajonKind.unclassified:
         return 'Sin clasificar';
+      case CajonKind.custom:
+        return 'Personalizados';
     }
   }
 
@@ -35,6 +39,9 @@ class Cajon {
   /// Lo que no tiene idioma va a "Sin clasificar".
   bool matches(Vinyl v) {
     if (v.isDivider) return false;
+    // Los personalizados viven solo en su biblioteca, sin importar el idioma.
+    if (CustomDiscs.isCustom(v)) return kind == CajonKind.custom;
+    if (kind == CajonKind.custom) return false;
     if (kind == CajonKind.unclassified) return v.lang == null;
     if (v.lang != lang) return false;
     // Sin cajón de covers: los cassettes y covers viven en Álbumes o Sueltos.
@@ -45,6 +52,7 @@ class Cajon {
         return !v.single;
       case CajonKind.covers:
       case CajonKind.unclassified:
+      case CajonKind.custom:
         return false;
     }
   }
@@ -55,6 +63,7 @@ class Cajon {
     Cajon(CajonKind.singles, 'en'),
     Cajon(CajonKind.singles, 'es'),
     Cajon(CajonKind.unclassified, null),
+    Cajon(CajonKind.custom, null),
   ];
 }
 

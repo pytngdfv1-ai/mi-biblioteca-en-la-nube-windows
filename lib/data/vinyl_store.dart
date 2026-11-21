@@ -84,6 +84,13 @@ class VinylStore extends ChangeNotifier {
     await _save();
   }
 
+  /// Agrega o reemplaza un disco personalizado.
+  Future<void> putCustom(Vinyl v) async {
+    _items = [v, ..._items.where((x) => x.id != v.id)];
+    notifyListeners();
+    await _save();
+  }
+
   /// Marca / desmarca un disco como cover (casetero).
   Future<void> setCassette(String id, bool on, {String? coverUrl}) async {
     _items = [

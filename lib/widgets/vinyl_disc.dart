@@ -3,8 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
+import '../data/custom_discs.dart';
 import '../data/tilt.dart';
 import '../data/ui_settings.dart';
+import 'disc_texture.dart';
 import 'wear_painter.dart';
 
 import '../data/cover_color.dart';
@@ -25,7 +27,11 @@ class VinylDisc extends StatelessWidget {
     this.elevation = 0,
     this.light = 0,
     this.wear = 0,
+    this.look,
   });
+
+  /// Aspecto personalizado (si es null se busca el del disco).
+  final CustomLook? look;
 
   final Vinyl vinyl;
   final double diameter;
@@ -47,6 +53,7 @@ class VinylDisc extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final d = diameter;
+    final lk = look ?? CustomDiscs.lookOf(vinyl.id);
     final e = elevation.clamp(0.0, 1.0).toDouble();
     final shadow = BoxShadow(
       color: Colors.black.withOpacity(0.5 - 0.15 * e),
@@ -63,7 +70,7 @@ class VinylDisc extends StatelessWidget {
             child: DecoratedBox(decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [shadow])),
           ),
           RepaintBoundary(
-            child: CustomPaint(size: Size.square(d), painter: _DiscBodyPainter(tracks, labelRatio)),
+            child: CustomPaint(size: Size.square(d), painter: _DiscBodyPainter(tracks, labelRatio, lk?.style ?? 0, lk?.color ?? 0)),
           ),
           Transform.rotate(
             angle: spin,
@@ -75,7 +82,7 @@ class VinylDisc extends StatelessWidget {
                   child: SizedBox(
                     width: d * labelRatio,
                     height: d * labelRatio,
-                    child: DiscLabel(vinyl: vinyl),
+                    child: DiscLabel(vinyl: vinyl, look: lk),
                   ),
                 ),
               ),
@@ -104,9 +111,11 @@ class VinylDisc extends StatelessWidget {
 
 /// Canto del vinilo, superficie con surcos finos y zonas lisas entre pistas.
 class _DiscBodyPainter extends CustomPainter {
-  _DiscBodyPainter(this.tracks, this.labelRatio);
+  _DiscBodyPainter(this.tracks, this.labelRatio, this.style, this.color);
   final int tracks;
   final double labelRatio;
+  final int style;
+  final int color;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -135,6 +144,8 @@ class _DiscBodyPainter extends CustomPainter {
           colors: [Colors.white.withOpacity(0.05), Colors.white.withOpacity(0.0)],
         ).createShader(Rect.fromCircle(center: c, radius: r)),
     );
+
+    paintDiscTexture(canvas, c, r * 0.982, style, Color(color));
 
     // Zonas: entrada lisa, surcos por tema y salida lisa junto a la etiqueta.
     final ro = r * 0.93;
@@ -170,7 +181,7 @@ class _DiscBodyPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _DiscBodyPainter old) => old.tracks != tracks || old.labelRatio != labelRatio;
+  bool shouldRepaint(covariant _DiscBodyPainter old) => old.tracks != tracks || old.labelRatio != labelRatio || old.style != style || old.color != color;
 }
 
 /// Brillo del vinilo: shader si está disponible (según la inclinación del equipo); si no, degradado.
@@ -274,8 +285,9 @@ class _SheenFallback extends CustomPainter {
 /// Etiqueta central generada desde la portada: color dominante de fondo, recorte circular del
 /// centro de la portada, artista y título en texto curvo, y agujero central.
 class DiscLabel extends StatefulWidget {
-  const DiscLabel({super.key, required this.vinyl});
+  const DiscLabel({super.key, required this.vinyl, this.look});
   final Vinyl vinyl;
+  final CustomLook? look;
 
   @override
   State<DiscLabel> createState() => _DiscLabelState();
@@ -326,8 +338,21 @@ class _DiscLabelState extends State<DiscLabel> {
               ),
               CustomPaint(
                 size: Size.square(d),
-                painter: _LabelTextPainter(artist: v.artist, title: v.title, year: v.yearLabel, ink: ink),
+                painter: _LabelTextPainter(
+                  artist: (widget.look?.labelText ?? '').isNotEmpty ? widget.look!.labelText : v.artist,
+                  title: (widget.look?.volume ?? 0) > 0 ? '${v.title} · Vol. ${widget.look!.volume}' : v.title,
+                  year: v.yearLabel,
+                  ink: ink,
+                ),
               ),
+              if (widget.look?.stamp == true)
+                for (final sx in const [-1.0, 1.0])
+                  Transform.translate(
+                    offset: Offset(sx * d * 0.40, 0),
+                    child: ClipOval(
+                      child: Image.asset('assets/icon/app_icon.png', width: d * 0.11, height: d * 0.11, fit: BoxFit.cover),
+                    ),
+                  ),
               // Agujero central con aro.
               Container(
                 width: d * 0.085,

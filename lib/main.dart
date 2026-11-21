@@ -1,4 +1,5 @@
 import 'data/objects3d.dart';
+import 'data/objects3d_queue.dart';
 import 'data/auto_backup.dart';
 import 'screens/splash_screen.dart';
 import 'data/equalizer.dart';
@@ -10,6 +11,7 @@ import 'audio/app_audio.dart';
 import 'audio/dj_session.dart';
 import 'audio/player_service.dart';
 import 'data/booklet_lite.dart';
+import 'data/custom_discs.dart';
 import 'data/cajon.dart';
 import 'data/discogs.dart';
 import 'data/koofr_settings.dart';
@@ -53,6 +55,7 @@ Future<void> main() async {
   await BookletLite.load();
   await KoofrAccounts.load();
   await Objects3D.load();
+  await CustomDiscs.load();
   await AutoBackup.init(store);
   await Playlists.instance.load();
   try {
@@ -62,7 +65,12 @@ Future<void> main() async {
   // Sincroniza las nubes al abrir (en segundo plano); el inicio espera a que termine.
   final sync = LibrarySync.syncAll(store);
   runApp(VinylApp(store: store, ready: sync));
-  sync.whenComplete(() => Objects3D.sync(store.items));
+  sync.whenComplete(() async {
+    await Objects3D.sync(store.items);
+    // Lo elegido que aún no tiene objeto se genera solo, en segundo plano.
+    final sel = Objects3D.selected.value;
+    Objects3DQueue.add(todo: [for (final v in store.items) if (sel.contains(v.id) && !Objects3D.has(v.id)) v]);
+  });
   // Busca actualizaciones en segundo plano.
   initUpdater();
 }

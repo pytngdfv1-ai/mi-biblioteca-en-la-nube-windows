@@ -127,4 +127,18 @@ class MusicBrainz {
       return null;
     }
   }
+
+  /// URL de la contraportada (Cover Art Archive) si existe.
+  static Future<String?> backCover(MbRelease r) async {
+    final url = 'https://coverartarchive.org/release/${r.id}/back-500';
+    try {
+      final res = await _client
+          .send(http.Request('HEAD', Uri.parse(url))..headers.addAll(headers))
+          .timeout(const Duration(seconds: 8));
+      await res.stream.drain<void>();
+      return res.statusCode == 200 ? url : null;
+    } catch (_) {
+      return null;
+    }
+  }
 }

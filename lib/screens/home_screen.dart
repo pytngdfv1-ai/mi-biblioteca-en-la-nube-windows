@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../audio/player_service.dart';
 import '../data/cajon.dart';
+import 'timeline_screen.dart';
+import '../data/objects3d_queue.dart';
 import '../data/library_sync.dart';
 import '../data/tilt.dart';
 import '../data/vinyl_store.dart';
@@ -118,6 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ('Buscador de temas y álbumes', 'Busca en tu biblioteca', MenuIconKind.search),
     ('Ajustes', 'Opciones de la app', MenuIconKind.gear),
     ('Ecualizador', 'Graves, medios y agudos', MenuIconKind.equalizer),
+    ('iPod', 'Rueda y pantalla', MenuIconKind.ipod),
   ];
   void _tool(int i) {
     switch (i) {
@@ -135,12 +138,14 @@ class _HomeScreenState extends State<HomeScreen> {
         _push(SearchScreen(store: widget.store));
       case 6:
         showLibrarySettings(context, store: widget.store);
-      default:
+      case 7:
         _push(const EqualizerScreen());
+      default:
+        _push(ModeScreen(store: widget.store, mode: PlayMode.ipod));
     }
   }
 
-  static const _models3d = ['technics', 'cassette_player', 'dj', 'melodia', 'crate'];
+  static const _models3d = <String?>['technics', 'cassette_player', 'dj', 'melodia', 'crate', 'lupa', 'gear', null, 'ipod'];
 
   Widget _ring(List<Cajon> cajones, List<Vinyl> all) {
     const items = _menuItems;
@@ -193,6 +198,18 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: AppColors.ink,
             title: const Text('Mi Biblioteca'),
             actions: [
+              ValueListenableBuilder<bool>(
+                valueListenable: Objects3DQueue.busy,
+                builder: (_, b, __) => !b
+                    ? const SizedBox.shrink()
+                    : Tooltip(
+                        message: 'Generando objetos 3D',
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Icon(Icons.view_in_ar, size: 18, color: Colors.white54),
+                        ),
+                      ),
+              ),
               ValueListenableBuilder<String?>(
                 valueListenable: LibrarySync.busy,
                 builder: (_, m, __) => m == null
@@ -212,6 +229,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icon(ring ? Icons.grid_view : Icons.threed_rotation),
                   onPressed: () => UiSettings.setHome(!ring),
                 ),
+              ),
+              IconButton(
+                tooltip: 'Línea de tiempo',
+                icon: const Icon(Icons.timeline),
+                onPressed: () => _push(TimelineScreen(store: widget.store)),
               ),
               IconButton(
                 tooltip: 'Buscar',

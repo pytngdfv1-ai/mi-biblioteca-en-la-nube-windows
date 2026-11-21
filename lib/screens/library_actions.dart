@@ -13,6 +13,8 @@ import 'reel_screen.dart';
 import 'cloud_explorer_screen.dart';
 import 'stage_screen.dart';
 import 'cover_suggest_screen.dart';
+import 'custom_discs_screen.dart';
+import 'ipod_screen.dart';
 import 'objects3d_screen.dart';
 
 /// Abre la pantalla del disco (tocadisco, deck o cinta abierta, según el reproductor elegido).
@@ -24,6 +26,9 @@ Future<void> openStage(BuildContext context, VinylStore store, Vinyl v) {
   }
   if (ViewMode.current == PlayMode.reel) {
     return Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ReelScreen(vinyl: v)));
+  }
+  if (ViewMode.current == PlayMode.ipod) {
+    return Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => IpodScreen(vinyl: v)));
   }
   return Navigator.of(context).push(
     PageRouteBuilder<void>(
@@ -64,7 +69,7 @@ Future<void> showLibrarySettings(BuildContext context, {VinylStore? store}) asyn
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setLocal) => AlertDialog(
         title: const Text('Ajustes de biblioteca'),
-        content: Column(
+        content: SingleChildScrollView(child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -91,6 +96,14 @@ Future<void> showLibrarySettings(BuildContext context, {VinylStore? store}) asyn
               title: const Text('Portadas sugeridas'),
               subtitle: const Text('Guarda en la carpeta la portada incrustrada o encontrada', style: TextStyle(fontSize: 12)),
               onTap: () => Navigator.of(ctx).push(MaterialPageRoute<void>(builder: (_) => CoverSuggestScreen(store: store!))),
+            ),
+            ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.library_music),
+              title: const Text('Discos personalizados'),
+              subtitle: const Text('Arma discos y cassettes con collage de portada', style: TextStyle(fontSize: 12)),
+              onTap: () => Navigator.of(ctx).push(MaterialPageRoute<void>(builder: (_) => CustomDiscsScreen(store: store!))),
             ),
             ListTile(
               dense: true,
@@ -208,7 +221,7 @@ Future<void> showLibrarySettings(BuildContext context, {VinylStore? store}) asyn
               ),
             ),
           ],
-        ),
+        )),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),

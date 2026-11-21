@@ -75,13 +75,25 @@ List<Face3> disc3(V3 c, double r, double t, ui.Image? face, {int n = 44, Color s
 }
 
 class Scene3DPainter extends CustomPainter {
-  Scene3DPainter(this.faces, this.yaw, this.pitch, {this.scale = .3, this.shift = Offset.zero, this.pan = Offset.zero});
+  Scene3DPainter(this.faces, this.yaw, this.pitch, {this.scale = .3, this.shift = Offset.zero, this.pan = Offset.zero, this.topLight = false});
+  final bool topLight;
   final List<Face3> faces;
   final double yaw, pitch, scale;
   final Offset shift;
   final Offset pan; // desplazamiento en píxeles
 
   static const _cam = 4.5;
+
+  /// Posición en pantalla (relativa al centro) de [p], para centrar la cámara en un punto.
+  static Offset project(V3 p, double yaw, double pitch, double k) {
+    final cy = math.cos(yaw), sy = math.sin(yaw), cp = math.cos(pitch), sp = math.sin(pitch);
+    final x = p.x * cy + p.z * sy;
+    final z0 = -p.x * sy + p.z * cy;
+    final y = p.y * cp - z0 * sp;
+    final z = p.y * sp + z0 * cp;
+    final s = _cam / (_cam + z);
+    return Offset(x * s * k, y * s * k);
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -121,7 +133,8 @@ class Scene3DPainter extends CustomPainter {
       final n = rot(f.normal);
       final dot = n.x * cx + n.y * cyy + n.z * (cz + _cam);
       if (dot >= 0) continue;
-      final lit = (n.x * .2 + n.y * .3 + n.z * -.93).clamp(0.0, 1.0);
+      var lit = (n.x * .2 + n.y * .3 + n.z * -.93).clamp(0.0, 1.0);
+      if (topLight) lit = math.max(lit, (-f.normal.y * .9).clamp(0.0, 1.0));
       vis.add((cz, f, rp, .5 + .5 * lit));
     }
     vis.sort((a, b) => b.$1.compareTo(a.$1));
