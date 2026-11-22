@@ -1,0 +1,770 @@
+[
+ {
+  "v": "1.67",
+  "titulo": "Ficha de información y avisos",
+  "agrega": [
+   "Ficha completa del álbum o tema (botón de información): año, sello, géneros y país editables; lista de temas con letras",
+   "Lo que falta aparece con ✗ rojo; al tocarlo te lleva al campo",
+   "Agente → Pendientes: lista Por completar con enlaces que abren la ficha en el campo que falta",
+   "Ajustes → Espacio en las nubes: total y usado de cada nube",
+   "Hojear busca la portada de los discos que no la tenían, igual que las bibliotecas",
+   "Aviso dentro de la app cuando hay una versión nueva (lo deja el agente en la nube)"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.66",
+  "titulo": "Menús de Reproductores y Bibliotecas",
+  "agrega": [
+   "Menú principal: Reproductores, Bibliotecas, Ajustes, Buscador de portadas, Buscador de temas y Ecualizador",
+   "Icono 3D que reúne todos los reproductores; al tocarlo se elige cada uno",
+   "Menú Bibliotecas con Discos y Cassettes, ambos en anillo 360°",
+   "Nuevo icono del buscador de portadas: cajón con lupa"
+  ],
+  "quita": [
+   "Iconos sueltos de cada reproductor en el menú principal (ahora están dentro de Reproductores)"
+  ]
+ },
+ {
+  "v": "1.65",
+  "titulo": "Agente más completo",
+  "agrega": [
+   "El agente deja un índice de toda la biblioteca (indice.json): la línea de tiempo carga los años al instante",
+   "Miniaturas de portada de 300 px para listas más rápidas",
+   "Fotos reales del sello del vinilo/CD y del cassette de cada edición: el sello gira en el disco y el cassette usa su carcasa real",
+   "Paleta de colores, contraste de texto recomendado y tipografía sugerida por álbum (en album.json)",
+   "Reintento inteligente: cada intento usa una fuente distinta"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.64",
+  "titulo": "Ficha completa de cada álbum",
+  "agrega": [
+   "El agente guarda en cada carpeta un album.json con todos los metadatos (año, sello, géneros, país, temas con duración), los archivos relacionados (portadas, libreto, letras) y qué falta",
+   "Respeta lo que ya estaba escrito o editado a mano"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.63",
+  "titulo": "Novedades",
+  "agrega": [
+   "Sección Novedades con todas las versiones",
+   "El agente corre una sola vez al día (03:17 de Uruguay)"
+  ],
+  "quita": [
+   "Revisiones del agente cada 2 horas"
+  ]
+ },
+ {
+  "v": "1.62",
+  "titulo": "Agente desde la app",
+  "agrega": [
+   "Pedir la ejecución del agente desde la app, sin token",
+   "Detección de la carpeta del agente y diagnóstico"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.61",
+  "titulo": "Agente ampliado",
+  "agrega": [
+   "Versiones livianas, texto de libretos, portada HD, libreto armado, letras y nombres corregidos",
+   "Sección Agente en Ajustes",
+   "Galería, orden de páginas y barra de reproducción en el libreto"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.60",
+  "titulo": "Línea de tiempo y Hojear",
+  "agrega": [
+   "Línea de tiempo con portadas y PDF a color",
+   "Modo Hojear",
+   "Surcos proporcionales a la duración de cada tema"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.59",
+  "titulo": "Niveles y guía",
+  "agrega": [
+   "Niveles reales de audio en el vúmetro y el ecualizador",
+   "Guía de la app",
+   "Agente con mejor coincidencia de metadatos"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.58",
+  "titulo": "iPod limpio",
+  "agrega": [
+   "Cuerpo del iPod en alta resolución con borde limpio"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.57",
+  "titulo": "iPod funcional",
+  "agrega": [
+   "iPod con el modelo del icono, pantalla y rueda funcionales",
+   "El agente ordena por artista (copia) y avisa en duplicados"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.56",
+  "titulo": "Engranaje y lupa",
+  "agrega": [
+   "Iconos 3D del engranaje (Ajustes) y la lupa (Buscador de temas)"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.55",
+  "titulo": "iPod con modelo 3D",
+  "agrega": [
+   "iPod con modelo 3D"
+  ],
+  "quita": [
+   "Sala de reproductores",
+   "Sala de escucha",
+   "Mini disc"
+  ]
+ },
+ {
+  "v": "1.54",
+  "titulo": "Salas",
+  "agrega": [
+   "Sala de reproductores y sala de escucha con clima real"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.53",
+  "titulo": "iPod y mini disc",
+  "agrega": [
+   "Reproductor iPod",
+   "Mini disc"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.52",
+  "titulo": "Contraportada y línea de tiempo",
+  "agrega": [
+   "Contraportada original, de internet, de archivo o generada y editable",
+   "Línea de tiempo de la biblioteca"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.51",
+  "titulo": "Cola 3D y retazos",
+  "agrega": [
+   "Cola de generación 3D en segundo plano",
+   "Retazos rasgados en el collage"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.50",
+  "titulo": "Sin Vista 3D",
+  "agrega": [],
+  "quita": [
+   "Vista 3D de los reproductores en funcionamiento"
+  ]
+ },
+ {
+  "v": "1.49",
+  "titulo": "Menú restaurado",
+  "agrega": [
+   "Restaura los modelos 3D del menú"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.48",
+  "titulo": "Sin efecto 3D en el menú",
+  "agrega": [
+   "Quita el efecto 3D de los reproductores del menú"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.47",
+  "titulo": "Personalizados",
+  "agrega": [
+   "Biblioteca \"Personalizados\", recortes y menú de ajustes deslizable"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.46",
+  "titulo": "Vista 3D de la cinta",
+  "agrega": [
+   "Carretes con paquete de cinta real y cabezales"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.45",
+  "titulo": "Vista 3D del reproductor",
+  "agrega": [
+   "Tocadiscos y deck con audio real y cámara libre"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.44",
+  "titulo": "Estilos",
+  "agrega": [
+   "Texturas, colores, etiqueta, numeración y sello en los discos personalizados"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.43",
+  "titulo": "Discos personalizados",
+  "agrega": [
+   "Discos con temas de la biblioteca, collage editable de portada, guardado en la nube"
+  ],
+  "quita": []
+ },
+ {
+  "v": "Agente",
+  "titulo": "Agente de la nube",
+  "agrega": [
+   "Agente gratuito que completa metadatos, descarga portadas y contraportadas y deja pendientes en tu nube"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.42",
+  "titulo": "Avisos y fondos",
+  "agrega": [
+   "Aviso de discos nuevos",
+   "Fondo de los reproductores según la portada"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.41",
+  "titulo": "Color de la portada",
+  "agrega": [
+   "Tocadiscos con el color de la portada"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.40",
+  "titulo": "Medidor analógico",
+  "agrega": [
+   "Color del tocadiscos",
+   "Medidor analógico con aguja en el ecualizador"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.39",
+  "titulo": "Cinta y paralaje",
+  "agrega": [
+   "Cinta abierta con velocidad real por carrete",
+   "Paralaje en el menú principal"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.38",
+  "titulo": "Sin parpadeo",
+  "agrega": [
+   "Sin parpadeo de colores y portadas al reconstruir las bibliotecas"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.37",
+  "titulo": "Subida verificada",
+  "agrega": [
+   "Verifica el tamaño en la nube antes de dar por buena la subida"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.36",
+  "titulo": "Más separación",
+  "agrega": [
+   "Más separación entre los iconos del menú 3D"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.35",
+  "titulo": "Iconos al doble",
+  "agrega": [
+   "Iconos del menú principal al doble"
+  ],
+  "quita": [
+   "Bibliotecas en el menú 2D"
+  ]
+ },
+ {
+  "v": "1.34",
+  "titulo": "Menú 2D",
+  "agrega": [
+   "Menú principal 2D con los mismos accesos",
+   "Discos y cassettes al doble en las bibliotecas"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.33",
+  "titulo": "Cassette relleno",
+  "agrega": [
+   "Relleno del cassette por bordes"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.32",
+  "titulo": "Sugeridas con reintentos",
+  "agrega": [
+   "Motivo de error visible, reintentos y sin repetir las guardadas"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.31",
+  "titulo": "Portadas sugeridas",
+  "agrega": [
+   "Portadas sugeridas (guardar en la carpeta)"
+  ],
+  "quita": [
+   "Línea amarilla del menú"
+  ]
+ },
+ {
+  "v": "1.30",
+  "titulo": "Inicio con progreso",
+  "agrega": [
+   "Inicio con progreso real",
+   "Brazo como el del tocadiscos"
+  ],
+  "quita": [
+   "Destello blanco"
+  ]
+ },
+ {
+  "v": "1.29",
+  "titulo": "Inicio animado",
+  "agrega": [
+   "Pantalla de inicio animada",
+   "Copia automática en la nube"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.28",
+  "titulo": "Portadas fiables",
+  "agrega": [
+   "Portadas más fiables",
+   "Rehacer objetos 3D",
+   "Iconos del menú más grandes"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.27",
+  "titulo": "Buscador posicionado",
+  "agrega": [
+   "El buscador abre la biblioteca posicionada en el disco"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.26",
+  "titulo": "Contraportada en 3D",
+  "agrega": [
+   "Contraportada guardada como \"Contraportada\" y usada en el visor 3D"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.25",
+  "titulo": "Zoom en el visor 3D",
+  "agrega": [
+   "Zoom y desplazamiento"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.24",
+  "titulo": "Motor 3D propio",
+  "agrega": [
+   "Motor 3D mínimo para el visor de objetos"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.23",
+  "titulo": "Objetos 3D por disco",
+  "agrega": [
+   "Generar, guardar en la nube y ver cada disco o cassette como objeto 3D, con vuelta"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.22",
+  "titulo": "Icono y ecualizador",
+  "agrega": [
+   "Ajustes al icono, a los créditos y al ecualizador"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.21",
+  "titulo": "Créditos 3D",
+  "agrega": [
+   "Créditos de los modelos 3D con sus fuentes"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.20",
+  "titulo": "Iconos 3D girables",
+  "agrega": [
+   "Modelos 3D reales (glb) que giran con el dedo"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.19",
+  "titulo": "Iconos según fotos",
+  "agrega": [
+   "Iconos del tocadiscos, deck y cinta abierta según fotos de referencia"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.18",
+  "titulo": "Explorador de la nube",
+  "agrega": [
+   "Mover, renombrar y borrar",
+   "Carpetas sin música"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.17",
+  "titulo": "Más realismo",
+  "agrega": [
+   "Bibliotecas al doble",
+   "Iconos más reales",
+   "VU con escala"
+  ],
+  "quita": [
+   "Cajón de covers"
+  ]
+ },
+ {
+  "v": "1.16",
+  "titulo": "Bibliotecas en cada reproductor",
+  "agrega": [
+   "Todas las bibliotecas dentro de cada reproductor",
+   "El chip abre el reproductor correcto"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.15",
+  "titulo": "Menú HD",
+  "agrega": [
+   "Menú solo con iconos 3D HD (incluye la 1.14)"
+  ],
+  "quita": [
+   "Menú de iconos planos"
+  ]
+ },
+ {
+  "v": "1.13",
+  "titulo": "Iconos 3D y ecualizador",
+  "agrega": [
+   "Iconos 3D en el menú",
+   "Cinta abierta",
+   "Ecualizador",
+   "Modos disco y cassette"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.12",
+  "titulo": "Portada que gira",
+  "agrega": [
+   "Portada de frente que gira a los temas y vuelve",
+   "La animación solo muestra el cassette entrando y saliendo del deck"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.11",
+  "titulo": "Tapa lisa",
+  "agrega": [
+   "Cara interna de la tapa lisa",
+   "Conjunto centrado y contratapa rectangular"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.10",
+  "titulo": "Estuche a 180°",
+  "agrega": [
+   "Estuche abierto con la lista de temas en la tapa y portada bajo el cassette",
+   "Vista de perfil",
+   "Música 2 segundos después de entrar al deck"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.09",
+  "titulo": "Sin repetir la apertura",
+  "agrega": [
+   "Si el disco ya suena no se repite la animación de apertura"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.08",
+  "titulo": "Estuche que gira",
+  "agrega": [
+   "El estuche se cierra y gira para los temas",
+   "Al expulsar gira lento, se abre y guarda el cassette",
+   "Animaciones más lentas"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.07",
+  "titulo": "Recorrido limpio",
+  "agrega": [
+   "Recorrido del cassette al estuche y al deck sin inclinación",
+   "Cabezal en el borde inferior"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.06",
+  "titulo": "Deck con mecanismo",
+  "agrega": [
+   "Brazo en reposo hasta que cae el disco",
+   "Estuche transparente",
+   "Deck vacío con mecanismo",
+   "Expulsión con estuche"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.05",
+  "titulo": "Estuche y EJECT",
+  "agrega": [
+   "Estuche del cassette",
+   "EJECT que detiene la reproducción",
+   "Disco con toque y reversa",
+   "Portada propia"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.04",
+  "titulo": "Realismo",
+  "agrega": [
+   "Disco y cassette únicos, 3D, shader, física, háptica y desgaste",
+   "Modo ahorro"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.03",
+  "titulo": "Animaciones de apertura",
+  "agrega": [
+   "Cassettes en el menú 360°",
+   "Portada sobre la franja del casetero",
+   "Animaciones de apertura"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.02",
+  "titulo": "Cassette con la portada",
+  "agrega": [
+   "Cassette de la ficha con la portada adaptada y etiquetas",
+   "Reintentos al reproducir desde la nube"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.01",
+  "titulo": "Cassettes 3D",
+  "agrega": [
+   "Vista desde el centro del anillo",
+   "Cassettes 3D (frente, lomo con degradado, parte posterior)"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.00",
+  "titulo": "Anillo 360°",
+  "agrega": [
+   "Menú principal y bibliotecas en anillo 360° (opcional en ajustes)",
+   "Cassettes de frente",
+   "Versión desde el archivo VERSION"
+  ],
+  "quita": []
+ },
+ {
+  "v": "Etapa 12",
+  "titulo": "Mi Biblioteca",
+  "agrega": [
+   "La app se llama Mi Biblioteca",
+   "Manual de uso en Acerca de",
+   "Audio en segundo plano con controles en la notificación y buscador general",
+   "APK del release \"MiBiblioteca.apk\"",
+   "Pendientes (sin portada o PDF), quitar portada equivocada, escaneo incremental y caché de miniaturas",
+   "Álbumes con carpeta repetida o CD1/CD2 quedan dentro del artista",
+   "Separadores transparentes con solapa, edición de nombres y carpeta nueva en la nube",
+   "Número de versión en Acerca de"
+  ],
+  "quita": []
+ },
+ {
+  "v": "Etapa 11",
+  "titulo": "DJ",
+  "agrega": [
+   "Playlists encadenadas y modo DJ horizontal",
+   "DJ en vivo: dos platos, crossfader, pitch y auto-mix",
+   "AutoDJ: análisis de tempo, orden por tempo, sincronización y arranque sin silencio",
+   "Aleatorio y En orden usan el DJ en vivo con dos platos",
+   "El DJ sigue sonando al salir de la pantalla, con cápsula en el mini reproductor"
+  ],
+  "quita": []
+ },
+ {
+  "v": "Etapa 10",
+  "titulo": "Cover Studio y subida",
+  "agrega": [
+   "Cover Studio: buscar y guardar portadas, libretos y PDF en la carpeta del disco",
+   "Subir a la nube desde el teléfono y detector de duplicados"
+  ],
+  "quita": []
+ },
+ {
+  "v": "Etapa 9",
+  "titulo": "Cassette y libretos mejorados",
+  "agrega": [
+   "Carretes que giran con la velocidad del rollo, cinta tangente real",
+   "Versión liviana del PDF guardada junto al original y reconocida desde otros equipos; PDF desde las imágenes del libreto",
+   "Deslizar la carátula para ver las páginas del libreto",
+   "Temas sueltos en mueble de cassettes y se reproducen en el casetero",
+   "Proporciones reales del cassette según imagen de referencia"
+  ],
+  "quita": []
+ },
+ {
+  "v": "Etapa 8",
+  "titulo": "Clasificación y datos",
+  "agrega": [
+   "Clasificación automática por idioma y covers, recuerdo por artista, migración y respaldo",
+   "Cajones por idioma y tipo (álbumes, sueltos, covers, sin clasificar) con nombres editables y filtros",
+   "Portadas en cadena (Cover Art Archive, iTunes, Deezer, Discogs) con caché local",
+   "Letras sincronizadas con LRCLIB",
+   "Folletos livianos en WebP, paleta central, tipografía Abril, fondo del reproductor con el color de la portada"
+  ],
+  "quita": [
+   "Permiso DUMP"
+  ]
+ },
+ {
+  "v": "Etapa 7",
+  "titulo": "Cassettes",
+  "agrega": [
+   "Cassettes para los covers: casetero de vidrio, baúl Covers con lomos",
+   "Cassette realista: carcasa de vidrio, carretes y cinta",
+   "Texto de la ficha con letra a mano",
+   "Mueble de cassettes al final del menú"
+  ],
+  "quita": []
+ },
+ {
+  "v": "Etapa 6",
+  "titulo": "Surcos y mover discos",
+  "agrega": [
+   "Tamaño del disco y bandas de surcos según el lanzamiento (un sencillo es un disco chico, una banda por tema)",
+   "Mover álbumes y temas a otra carpeta de la nube (sin borrar ni sobrescribir)",
+   "Mover conserva portada y marca \"no lo tengo\""
+  ],
+  "quita": []
+ },
+ {
+  "v": "Etapa 5",
+  "titulo": "Cajones y bibliotecas",
+  "agrega": [
+   "Cajón de sueltos y año de lanzamiento (ordena por año dentro del artista)",
+   "Pantalla de inicio con un cajón de madera por biblioteca",
+   "Bibliotecas separadas por carpeta principal (detección automática)",
+   "Respaldo y restauración cifrados, APK firmado con versión"
+  ],
+  "quita": []
+ },
+ {
+  "v": "Etapa 4",
+  "titulo": "Reproducción continua y libretos",
+  "agrega": [
+   "Sigue sonando al salir del disco, mini reproductor",
+   "Tocadiscos rediseñado, plano",
+   "Libretos: páginas de imágenes y PDF dentro de la app",
+   "Varias cuentas de Koofr con géneros, orden A-Z y separadores por artista"
+  ],
+  "quita": []
+ },
+ {
+  "v": "Etapa 3",
+  "titulo": "Tocadiscos con brazo",
+  "agrega": [
+   "El brazo recorre el disco según el progreso",
+   "La carátula va en la etiqueta del disco",
+   "El brazo se levanta al cambiar de tema",
+   "Solo álbumes completos y portada obligatoria (carpeta, FLAC, iTunes, Deezer, MusicBrainz)"
+  ],
+  "quita": []
+ },
+ {
+  "v": "Etapa 2",
+  "titulo": "Portadas reales y carpeta local",
+  "agrega": [
+   "Portadas reales de iTunes",
+   "Biblioteca desde una carpeta del teléfono (con permisos y reproducción local)",
+   "Borrar cualquier disco de la lista",
+   "Escaneo de audio en cualquier subcarpeta"
+  ],
+  "quita": [
+   "Discos de demostración"
+  ]
+ },
+ {
+  "v": "Etapa 1",
+  "titulo": "Nube y audio",
+  "agrega": [
+   "Biblioteca en tu nube Koofr (WebDAV) con reproducción de FLAC en streaming",
+   "Pantalla de ajustes para conectar la cuenta"
+  ],
+  "quita": []
+ },
+ {
+  "v": "Inicio",
+  "titulo": "Primera versión",
+  "agrega": [
+   "Biblioteca de álbumes en un cajón, tocadiscos y lectura de la nube Koofr."
+  ],
+  "quita": []
+ }
+]

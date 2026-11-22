@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/manual_content.dart';
 import '../theme.dart';
+import 'novedades_screen.dart';
 
 /// Acerca de: presentación de la app y manual de uso.
 class AboutScreen extends StatefulWidget {
@@ -132,6 +133,10 @@ class _AboutScreenState extends State<AboutScreen> {
         Wrap(spacing: 8, runSpacing: 8, children: [
           pill('Versión ', const String.fromEnvironment('APP_VERSION', defaultValue: '1.0 (desarrollo)')),
           pill('', 'Manual de uso'),
+          GestureDetector(
+            onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const NovedadesScreen())),
+            child: pill('', 'Novedades'),
+          ),
           pill('', 'Sin cuenta, sin anuncios'),
         ]),
       ],

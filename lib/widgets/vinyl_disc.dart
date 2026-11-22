@@ -3,7 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import '../data/custom_discs.dart';
+import '../data/track_durations.dart';
 import '../data/tilt.dart';
 import '../data/ui_settings.dart';
 import 'disc_texture.dart';
@@ -11,6 +13,7 @@ import 'wear_painter.dart';
 
 import '../data/cover_color.dart';
 import '../models/vinyl.dart';
+import '../models/vinyl_extras.dart';
 import 'cover_art.dart';
 
 /// Disco de vinilo ÚNICO: se usa igual al salir de la funda (open_animation) y sobre el plato
@@ -70,7 +73,13 @@ class VinylDisc extends StatelessWidget {
             child: DecoratedBox(decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [shadow])),
           ),
           RepaintBoundary(
-            child: CustomPaint(size: Size.square(d), painter: _DiscBodyPainter(tracks, labelRatio, lk?.style ?? 0, lk?.color ?? 0)),
+            child: ValueListenableBuilder<int>(
+              valueListenable: TrackDurations.version,
+              builder: (_, __, ___) => CustomPaint(
+                size: Size.square(d),
+                painter: _DiscBodyPainter(tracks, labelRatio, lk?.style ?? 0, lk?.color ?? 0, TrackDurations.bounds(vinyl.id, tracks)),
+              ),
+            ),
           ),
           Transform.rotate(
             angle: spin,
@@ -111,7 +120,8 @@ class VinylDisc extends StatelessWidget {
 
 /// Canto del vinilo, superficie con surcos finos y zonas lisas entre pistas.
 class _DiscBodyPainter extends CustomPainter {
-  _DiscBodyPainter(this.tracks, this.labelRatio, this.style, this.color);
+  _DiscBodyPainter(this.tracks, this.labelRatio, this.style, this.color, this.bounds);
+  final List<double> bounds;
   final int tracks;
   final double labelRatio;
   final int style;
@@ -152,7 +162,7 @@ class _DiscBodyPainter extends CustomPainter {
     final ri = r * (labelRatio + 0.10);
     final n = math.min(math.max(1, tracks), 31);
     final gapW = math.max(1.4, r * 0.016);
-    final gaps = <double>[for (var k = 1; k < n; k++) ro - (ro - ri) * k / n];
+    final gaps = <double>[for (var k = 1; k < n; k++) ro - (ro - ri) * (bounds.length > k ? bounds[k] : k / n)];
 
     final groove = Paint()
       ..style = PaintingStyle.stroke
@@ -181,7 +191,7 @@ class _DiscBodyPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _DiscBodyPainter old) => old.tracks != tracks || old.labelRatio != labelRatio || old.style != style || old.color != color;
+  bool shouldRepaint(covariant _DiscBodyPainter old) => !listEquals(old.bounds, bounds) || old.tracks != tracks || old.labelRatio != labelRatio || old.style != style || old.color != color;
 }
 
 /// Brillo del vinilo: shader si está disponible (según la inclinación del equipo); si no, degradado.
@@ -320,6 +330,16 @@ class _DiscLabelState extends State<DiscLabel> {
             alignment: Alignment.center,
             children: [
               ClipOval(child: ColoredBox(color: base, child: SizedBox(width: d, height: d))),
+              // Sello real del disco (foto hecha por el agente): gira con el plato.
+              if (v.labelUrl != null)
+                ClipOval(
+                  child: SizedBox(
+                    width: d,
+                    height: d,
+                    child: buildCoverImage(v.labelUrl!, cacheWidth: 400, fit: BoxFit.cover, fallback: const SizedBox()),
+                  ),
+                ),
+              if (v.labelUrl == null) ...[
               SizedBox(
                 width: d * 0.60,
                 height: d * 0.60,
@@ -353,6 +373,7 @@ class _DiscLabelState extends State<DiscLabel> {
                       child: Image.asset('assets/icon/app_icon.png', width: d * 0.11, height: d * 0.11, fit: BoxFit.cover),
                     ),
                   ),
+              ],
               // Agujero central con aro.
               Container(
                 width: d * 0.085,

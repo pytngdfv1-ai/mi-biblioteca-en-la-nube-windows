@@ -129,6 +129,30 @@ class KoofrClient {
     return segs.length >= root.length ? segs.sublist(root.length) : segs;
   }
 
+  /// Espacio de la cuenta: (usado, disponible) en bytes, o null si el servidor no lo informa.
+  Future<(int, int?)?> quota() async {
+    for (final u in [_musicDir(), _root]) {
+      try {
+        final req = http.Request('PROPFIND', u)
+          ..headers.addAll({...settings.headers, 'Depth': '0', 'Content-Type': 'application/xml'})
+          ..body = '<?xml version="1.0"?><d:propfind xmlns:d="DAV:"><d:prop>'
+              '<d:quota-used-bytes/><d:quota-available-bytes/></d:prop></d:propfind>';
+        final res = await http.Response.fromStream(await _http.send(req).timeout(const Duration(seconds: 30)));
+        if (res.statusCode != 207) continue;
+        final doc = XmlDocument.parse(res.body);
+        int? used, avail;
+        for (final e in doc.findAllElements('quota-used-bytes', namespace: '*')) {
+          used = int.tryParse(e.innerText.trim());
+        }
+        for (final e in doc.findAllElements('quota-available-bytes', namespace: '*')) {
+          avail = int.tryParse(e.innerText.trim());
+        }
+        if (used != null) return (used, avail);
+      } catch (_) {}
+    }
+    return null;
+  }
+
   /// Carpetas de primer nivel de la carpeta raíz (destinos posibles).
   Future<List<String>> topFolders() async {
     final entries = await _list(_musicDir());
@@ -466,8 +490,8 @@ class KoofrClient {
         final imgs0 = entries
             .where((e) => !e.isDir && _imageExt.any((x) => e.name.toLowerCase().endsWith(x)))
             .toList();
-        final pref0 = RegExp(r'^(cover|folder|front|album|artwork|portada|car[aá]tula)(\s*\d+)?\.', caseSensitive: false);
-        final art0 = imgs0.where((e) => pref0.hasMatch(e.name)).firstOrNull ?? imgs0.firstOrNull;
+        final pref0 = RegExp(r'^(cover|folder|front|album|artwork|portada|car[aá]tula)(\s*(\d+|hd))?\.', caseSensitive: false);
+        final art0 = imgs0.where((e) => pref0.hasMatch(e.name) && RegExp(r'\bhd\.', caseSensitive: false).hasMatch(e.name)).firstOrNull ?? imgs0.where((e) => pref0.hasMatch(e.name)).firstOrNull ?? imgs0.firstOrNull;
         for (final e in audio) {
           out.add(AlbumDraft(
             key: '${full.join('/')}/${e.name}',
@@ -489,10 +513,10 @@ class KoofrClient {
         final images = entries
             .where((e) => !e.isDir && _imageExt.any((x) => e.name.toLowerCase().endsWith(x)))
             .toList();
-        final pref = RegExp(r'^(cover|folder|front|album|artwork|portada|car[aá]tula)(\s*\d+)?\.', caseSensitive: false);
-        final art = images.where((e) => pref.hasMatch(e.name)).firstOrNull ?? images.firstOrNull;
+        final pref = RegExp(r'^(cover|folder|front|album|artwork|portada|car[aá]tula)(\s*(\d+|hd))?\.', caseSensitive: false);
+        final art = images.where((e) => pref.hasMatch(e.name) && RegExp(r'\bhd\.', caseSensitive: false).hasMatch(e.name)).firstOrNull ?? images.where((e) => pref.hasMatch(e.name)).firstOrNull ?? images.firstOrNull;
         // Libreto: resto de imágenes y PDFs, más los de subcarpetas "Libreto", "Booklet"…
-        final imgs = images.where((e) => e != art).toList()
+        final imgs = images.where((e) => e != art && !(pref.hasMatch(e.name) && art != null && pref.hasMatch(art.name))).toList()
           ..sort((a, b) => naturalCompare(a.name, b.name));
         final pdfs = entries.where((e) => !e.isDir && e.name.toLowerCase().endsWith('.pdf')).toList()
           ..sort((a, b) => naturalCompare(a.name, b.name));

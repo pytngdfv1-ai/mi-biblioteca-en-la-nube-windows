@@ -1,7 +1,12 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pdfx/pdfx.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../audio/player_service.dart';
 
 import '../data/booklet_lite.dart';
 import '../data/fetch_bytes.dart';
@@ -25,16 +30,30 @@ class BookletScreen extends StatelessWidget {
     return n.replaceAll(RegExp(r'\.pdf$', caseSensitive: false), '');
   }
 
+  static String _stem(String url) {
+    var n = Uri.parse(url).pathSegments.lastWhere((s) => s.isNotEmpty, orElse: () => '');
+    try {
+      n = Uri.decodeComponent(n);
+    } catch (_) {}
+    final i = n.lastIndexOf('.');
+    return i > 0 ? n.substring(0, i) : n;
+  }
+
   @override
   Widget build(BuildContext context) {
     // Las páginas livianas guardadas junto a un PDF se muestran en la pestaña de ese PDF.
     final images = [for (final u in vinyl.booklet) if (!BookletLite.isLitePage(u)) u];
+    // Versiones livianas hechas por el agente: 'Libreto liviano - imagenes/<nombre>.webp'.
+    final lite = <String, String>{
+      for (final u in vinyl.booklet)
+        if (Uri.decodeFull(Uri.parse(u).removeFragment().path).contains('/Libreto liviano - imagenes/')) _stem(u): u,
+    };
     final tabs = <String>[
       if (images.isNotEmpty) 'Imágenes (${images.length})',
       for (final p in vinyl.pdfs) _name(p),
     ];
     final views = <Widget>[
-      if (images.isNotEmpty) _ImagesTab(vinyl: vinyl, store: store, urls: images),
+      if (images.isNotEmpty) _ImagesTab(vinyl: vinyl, store: store, urls: images, lite: lite),
       for (final p in vinyl.pdfs) _PdfTab(url: p, remote: BookletLite.remotePages(vinyl, p)),
     ];
     return DefaultTabController(
@@ -52,6 +71,7 @@ class BookletScreen extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           children: views,
         ),
+        bottomNavigationBar: const _ReadingBar(),
       ),
     );
   }
@@ -59,8 +79,9 @@ class BookletScreen extends StatelessWidget {
 
 /// Pestaña de imágenes: visor y botón para crear un PDF con ellas.
 class _ImagesTab extends StatefulWidget {
-  const _ImagesTab({required this.vinyl, required this.store, required this.urls});
+  const _ImagesTab({required this.vinyl, required this.store, required this.urls, this.lite = const {}});
 
+  final Map<String, String> lite;
   final Vinyl vinyl;
   final VinylStore? store;
   final List<String> urls;
@@ -72,6 +93,78 @@ class _ImagesTab extends StatefulWidget {
 class _ImagesTabState extends State<_ImagesTab> with AutomaticKeepAliveClientMixin {
   String? _progress;
   String? _msg;
+  bool _grid = false;
+  int _start = 0;
+  List<String> _order = [];
+
+  String get _prefKey => 'booklet_order_${widget.vinyl.id}';
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((p) {
+      final raw = p.getString(_prefKey);
+      if (raw != null && mounted) setState(() => _order = List<String>.from(jsonDecode(raw) as List));
+    }).catchError((_) {});
+  }
+
+  /// Páginas en el orden elegido (las nuevas al final, en orden natural).
+  List<String> get _ordered {
+    if (_order.isEmpty) return widget.urls;
+    final idx = {for (var i = 0; i < _order.length; i++) _order[i]: i};
+    final l = [...widget.urls];
+    l.sort((a, b) => (idx[a] ?? 1 << 20).compareTo(idx[b] ?? 1 << 20));
+    return l;
+  }
+
+  String _show(String u) => widget.lite[BookletScreen._stem(u)] ?? u;
+
+  Future<void> _reorder() async {
+    final l = [..._ordered];
+    final res = await showDialog<List<String>>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setL) => AlertDialog(
+          title: const Text('Orden de las páginas'),
+          content: SizedBox(
+            width: double.maxFinite,
+            height: 380,
+            child: ReorderableListView(
+              onReorder: (a, b) => setL(() {
+                if (b > a) b--;
+                l.insert(b, l.removeAt(a));
+              }),
+              children: [
+                for (var i = 0; i < l.length; i++)
+                  ListTile(
+                    key: ValueKey(l[i]),
+                    dense: true,
+                    leading: SizedBox(width: 36, height: 36, child: buildCoverImage(_show(l[i]), cacheWidth: 120, fit: BoxFit.cover, fallback: const SizedBox())),
+                    title: Text('Página ${i + 1}'),
+                    trailing: const Icon(Icons.drag_handle),
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+            TextButton(onPressed: () => Navigator.pop(ctx, <String>[]), child: const Text('Orden natural')),
+            FilledButton(onPressed: () => Navigator.pop(ctx, l), child: const Text('Guardar')),
+          ],
+        ),
+      ),
+    );
+    if (res == null) return;
+    try {
+      final p = await SharedPreferences.getInstance();
+      if (res.isEmpty) {
+        await p.remove(_prefKey);
+      } else {
+        await p.setString(_prefKey, jsonEncode(res));
+      }
+    } catch (_) {}
+    if (mounted) setState(() => _order = res);
+  }
 
   @override
   bool get wantKeepAlive => true;
@@ -83,7 +176,7 @@ class _ImagesTabState extends State<_ImagesTab> with AutomaticKeepAliveClientMix
     });
     try {
       final bytes = await ImagesToPdf.build(
-        widget.urls,
+        _ordered,
         onProgress: (d, t) {
           if (mounted) setState(() => _progress = '$d / $t');
         },
@@ -119,6 +212,13 @@ class _ImagesTabState extends State<_ImagesTab> with AutomaticKeepAliveClientMix
                   label: const Text('Crear PDF con estas imágenes'),
                   onPressed: _makePdf,
                 ),
+              const Spacer(),
+              IconButton(
+                tooltip: _grid ? 'Ver páginas' : 'Ver galería',
+                icon: Icon(_grid ? Icons.view_carousel_outlined : Icons.grid_view),
+                onPressed: () => setState(() => _grid = !_grid),
+              ),
+              IconButton(tooltip: 'Orden de las páginas', icon: const Icon(Icons.swap_vert), onPressed: _reorder),
             ],
           ),
         ),
@@ -127,7 +227,22 @@ class _ImagesTabState extends State<_ImagesTab> with AutomaticKeepAliveClientMix
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(_msg!, style: const TextStyle(fontSize: 12, color: Colors.white70)),
           ),
-        Expanded(child: _Pages(urls: widget.urls)),
+        Expanded(
+          child: _grid
+              ? GridView.builder(
+                  padding: const EdgeInsets.all(8),
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 150, mainAxisSpacing: 6, crossAxisSpacing: 6),
+                  itemCount: _ordered.length,
+                  itemBuilder: (_, i) => GestureDetector(
+                    onTap: () => setState(() {
+                      _start = i;
+                      _grid = false;
+                    }),
+                    child: buildCoverImage(_show(_ordered[i]), cacheWidth: 400, fit: BoxFit.cover, fallback: const SizedBox()),
+                  ),
+                )
+              : _Pages(key: ValueKey('p$_start${_order.length}'), urls: [for (final u in _ordered) _show(u)], initial: _start),
+        ),
       ],
     );
   }
@@ -135,16 +250,24 @@ class _ImagesTabState extends State<_ImagesTab> with AutomaticKeepAliveClientMix
 
 /// Imágenes del libreto: desliza para cambiar de página, pellizca para ampliar.
 class _Pages extends StatefulWidget {
-  const _Pages({required this.urls});
+  const _Pages({super.key, required this.urls, this.initial = 0});
 
   final List<String> urls;
+  final int initial;
 
   @override
   State<_Pages> createState() => _PagesState();
 }
 
 class _PagesState extends State<_Pages> {
-  int _page = 0;
+  late int _page = widget.initial.clamp(0, widget.urls.isEmpty ? 0 : widget.urls.length - 1);
+  late final PageController _pc = PageController(initialPage: _page);
+
+  @override
+  void dispose() {
+    _pc.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,6 +275,7 @@ class _PagesState extends State<_Pages> {
     return Stack(
       children: [
         PageView.builder(
+          controller: _pc,
           itemCount: widget.urls.length,
           onPageChanged: (i) => setState(() => _page = i),
           itemBuilder: (_, i) => InteractiveViewer(
@@ -280,6 +404,25 @@ class _PdfTabState extends State<_PdfTab> with AutomaticKeepAliveClientMixin {
     super.dispose();
   }
 
+  Future<void> _showText() async {
+    final u = Uri.parse(widget.url);
+    final segs = [...u.pathSegments];
+    var stem = Uri.decodeComponent(segs.last);
+    stem = stem.replaceAll(RegExp(r'\.pdf$', caseSensitive: false), '');
+    segs[segs.length - 1] = 'Texto - $stem.txt';
+    String? text;
+    try {
+      text = utf8.decode(await fetchBytes(u.replace(pathSegments: segs).toString()));
+    } catch (_) {}
+    if (!mounted) return;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF16161B),
+      builder: (_) => _TextSheet(text: text),
+    );
+  }
+
   String _mb(int b) => '${(b / 1048576).toStringAsFixed(1)} MB';
 
   @override
@@ -340,6 +483,7 @@ class _PdfTabState extends State<_PdfTab> with AutomaticKeepAliveClientMixin {
                   label: const Text('Convertir a versión liviana'),
                   onPressed: _convert,
                 ),
+              IconButton(tooltip: 'Texto del libreto (buscar, copiar letras)', icon: const Icon(Icons.text_snippet_outlined), onPressed: _showText),
               if (_error != null && c != null) const Icon(Icons.error_outline, color: Colors.redAccent),
             ],
           ),
@@ -415,6 +559,106 @@ class _PdfPagesState extends State<_PdfPages> {
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+
+/// Barra de reproducción para leer el libreto mientras suena el disco.
+class _ReadingBar extends StatelessWidget {
+  const _ReadingBar();
+
+  @override
+  Widget build(BuildContext context) {
+    final ps = PlayerService.instance;
+    return ValueListenableBuilder(
+      valueListenable: ps.nowPlaying,
+      builder: (_, v, __) {
+        if (v == null) return const SizedBox.shrink();
+        return StreamBuilder<bool>(
+          stream: ps.player.playingStream,
+          builder: (_, snap) {
+            final playing = snap.data ?? false;
+            final i = (ps.player.currentIndex ?? 0).clamp(0, v.tracks.isEmpty ? 0 : v.tracks.length - 1).toInt();
+            return Container(
+              color: const Color(0xFF17171C),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: SafeArea(
+                top: false,
+                child: Row(children: [
+                  SizedBox(width: 36, height: 36, child: CoverArt(vinyl: v, radius: 4)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(v.tracks.isEmpty ? v.title : v.tracks[i], maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
+                  ),
+                  IconButton(icon: const Icon(Icons.skip_previous), onPressed: () => ps.goTrack(i - 1)),
+                  IconButton(
+                    icon: Icon(playing ? Icons.pause : Icons.play_arrow),
+                    onPressed: () => playing ? ps.player.pause() : ps.player.play(),
+                  ),
+                  IconButton(icon: const Icon(Icons.skip_next), onPressed: () => ps.goTrack(i + 1)),
+                ]),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+
+/// Texto del libreto (lo prepara el agente con OCR): buscar y copiar.
+class _TextSheet extends StatefulWidget {
+  const _TextSheet({required this.text});
+  final String? text;
+
+  @override
+  State<_TextSheet> createState() => _TextSheetState();
+}
+
+class _TextSheetState extends State<_TextSheet> {
+  String _q = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final t = widget.text;
+    final h = MediaQuery.of(context).size.height * .8;
+    if (t == null || t.trim().isEmpty) {
+      return SizedBox(
+        height: 160,
+        child: const Center(child: Padding(padding: EdgeInsets.all(24), child: Text('Todavía no hay texto de este libreto. Lo prepara el agente de la nube.', textAlign: TextAlign.center))),
+      );
+    }
+    final q = _q.trim().toLowerCase();
+    final lines = t.split('\n');
+    final shown = q.isEmpty ? lines : lines.where((l) => l.toLowerCase().contains(q)).toList();
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: SizedBox(
+        height: h,
+        child: Column(children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 4, 4),
+            child: Row(children: [
+              Expanded(child: TextField(decoration: const InputDecoration(hintText: 'Buscar en el libreto', prefixIcon: Icon(Icons.search), isDense: true), onChanged: (v) => setState(() => _q = v))),
+              IconButton(
+                tooltip: 'Copiar todo',
+                icon: const Icon(Icons.copy),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: t));
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Texto copiado')));
+                },
+              ),
+            ]),
+          ),
+          Expanded(
+            child: shown.isEmpty
+                ? const Center(child: Text('Sin resultados'))
+                : ListView(padding: const EdgeInsets.all(14), children: [SelectableText(shown.join('\n'), style: const TextStyle(height: 1.4, fontSize: 14))]),
+          ),
+        ]),
       ),
     );
   }

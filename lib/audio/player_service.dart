@@ -6,6 +6,8 @@ import 'package:just_audio/just_audio.dart';
 
 import '../data/equalizer.dart';
 import '../data/koofr_settings.dart';
+import '../data/levels.dart';
+import '../data/track_durations.dart';
 import '../models/vinyl.dart';
 import 'koofr_proxy.dart';
 
@@ -13,6 +15,18 @@ import 'koofr_proxy.dart';
 /// del disco (para buscar otro en la biblioteca).
 class PlayerService {
   PlayerService._() {
+    TrackDurations.load();
+    player.durationStream.listen((d) {
+      final v = nowPlaying.value;
+      final i = player.currentIndex;
+      if (d != null && v != null && i != null) TrackDurations.learn(v.id, i, d.inMilliseconds, v.trackUrls.length);
+    });
+    player.playingStream.listen((p) {
+      if (p && !_levelsStarted) {
+        _levelsStarted = true;
+        Levels.init(player);
+      }
+    });
     player.currentIndexStream.listen(_onIndex);
     // Recuerda la duración de cada tema (a veces no se vuelve a informar al cambiar de tema).
     player.durationStream.listen((d) {
@@ -42,6 +56,7 @@ class PlayerService {
     return (cur / dur.inMilliseconds).clamp(0.0, 1.0).toDouble();
   }
 
+  bool _levelsStarted = false;
   String? _loadedId;
   int _lastIndex = 0;
   bool _changing = false;

@@ -70,12 +70,20 @@ class LocalScanner {
       }
       final src = group == null ? 'local' : 'local:$group';
       final images = list.where((f) => _hasExt(f.path, _imageExt)).toList();
-      final pref = RegExp(r'^(cover|folder|front|album|artwork|portada|car[aá]tula)(\s*\d+)?\.', caseSensitive: false);
+      final pref = RegExp(r'^(cover|folder|front|album|artwork|portada|car[aá]tula)(\s*(\d+|hd))?\.', caseSensitive: false);
       File? art;
       for (final f in images) {
-        if (pref.hasMatch(_base(f.path))) {
+        if (pref.hasMatch(_base(f.path)) && RegExp(r'\bhd\.', caseSensitive: false).hasMatch(_base(f.path))) {
           art = f;
           break;
+        }
+      }
+      if (art == null) {
+        for (final f in images) {
+          if (pref.hasMatch(_base(f.path))) {
+            art = f;
+            break;
+          }
         }
       }
       art ??= images.isEmpty ? null : images.first;
