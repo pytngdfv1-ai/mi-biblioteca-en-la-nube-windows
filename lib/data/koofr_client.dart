@@ -488,10 +488,32 @@ class KoofrClient {
       if (names.isEmpty || audio.length < LibrarySettings.minTracks) {
         // Cada tema va al baúl de temas sueltos.
         final imgs0 = entries
-            .where((e) => !e.isDir && _imageExt.any((x) => e.name.toLowerCase().endsWith(x)))
+            .where((e) => !e.isDir && !isAgentFileName(e.name) && _imageExt.any((x) => e.name.toLowerCase().endsWith(x)))
             .toList();
         final pref0 = RegExp(r'^(cover|folder|front|album|artwork|portada|car[aá]tula)(\s*(\d+|hd))?\.', caseSensitive: false);
         final art0 = imgs0.where((e) => pref0.hasMatch(e.name) && RegExp(r'\bhd\.', caseSensitive: false).hasMatch(e.name)).firstOrNull ?? imgs0.where((e) => pref0.hasMatch(e.name)).firstOrNull ?? imgs0.firstOrNull;
+        // Libreto del tema suelto (solo si está en su propia carpeta): imágenes que no son portada ni
+        // portada de otro tema, PDFs y subcarpetas «Libreto», «Booklet»…
+        final sImgs = <_Entry>[];
+        final sPdfs = <_Entry>[];
+        if (names.isNotEmpty) {
+          final stems = [for (final a in audio) a.name.toLowerCase().replaceFirst(RegExp(r'\.[^.]+$'), '')];
+          bool trackCover(String n) {
+            final st = n.toLowerCase().replaceFirst(RegExp(r'\.[^.]+$'), '');
+            return st.length > 2 && stems.any((t) => t.contains(st));
+          }
+          sImgs.addAll(imgs0.where((e) => e != art0 && !pref0.hasMatch(e.name) && !trackCover(e.name)));
+          sPdfs.addAll(entries.where((e) => !e.isDir && e.name.toLowerCase().endsWith('.pdf')));
+          for (final d in entries.where((e) => e.isDir && isBookletDir(e.name))) {
+            try {
+              final sub = await _list(d.uri);
+              sImgs.addAll(sub.where((e) => !e.isDir && !isAgentFileName(e.name) && _imageExt.any((x) => e.name.toLowerCase().endsWith(x))));
+              sPdfs.addAll(sub.where((e) => !e.isDir && e.name.toLowerCase().endsWith('.pdf')));
+            } catch (_) {}
+          }
+          sImgs.sort((a, b) => naturalCompare(a.name, b.name));
+          sPdfs.sort((a, b) => naturalCompare(a.name, b.name));
+        }
         for (final e in audio) {
           out.add(AlbumDraft(
             key: '${full.join('/')}/${e.name}',
@@ -504,6 +526,8 @@ class KoofrClient {
             trackFiles: [e.name],
             trackUrls: [_u(e.uri)],
             folderImageUrl: names.isEmpty || art0 == null ? null : _u(art0.uri),
+            bookletImages: [for (final x in sImgs) _u(x.uri)],
+            pdfs: [for (final x in sPdfs) _u(x.uri)],
             readMeta: e.name.toLowerCase().endsWith('.flac')
                 ? () => readFlacMeta(_reader(e.uri))
                 : null,
@@ -511,7 +535,7 @@ class KoofrClient {
         }
       } else {
         final images = entries
-            .where((e) => !e.isDir && _imageExt.any((x) => e.name.toLowerCase().endsWith(x)))
+            .where((e) => !e.isDir && !isAgentFileName(e.name) && _imageExt.any((x) => e.name.toLowerCase().endsWith(x)))
             .toList();
         final pref = RegExp(r'^(cover|folder|front|album|artwork|portada|car[aá]tula)(\s*(\d+|hd))?\.', caseSensitive: false);
         final art = images.where((e) => pref.hasMatch(e.name) && RegExp(r'\bhd\.', caseSensitive: false).hasMatch(e.name)).firstOrNull ?? images.where((e) => pref.hasMatch(e.name)).firstOrNull ?? images.firstOrNull;
@@ -524,7 +548,7 @@ class KoofrClient {
           try {
             final sub = await _list(d.uri);
             imgs.addAll(sub
-                .where((e) => !e.isDir && _imageExt.any((x) => e.name.toLowerCase().endsWith(x)))
+                .where((e) => !e.isDir && !isAgentFileName(e.name) && _imageExt.any((x) => e.name.toLowerCase().endsWith(x)))
                 .toList()
               ..sort((a, b) => naturalCompare(a.name, b.name)));
             pdfs.addAll(sub

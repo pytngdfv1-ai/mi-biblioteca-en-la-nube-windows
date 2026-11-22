@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/agent_index.dart';
 import '../data/vinyl_store.dart';
 import '../models/vinyl.dart';
 import '../theme.dart';
@@ -25,9 +26,36 @@ class _Hit {
   final int? track;
 }
 
+class _Lyr {
+  const _Lyr(this.v, this.tema, this.frag);
+  final Vinyl v;
+  final String tema;
+  final String frag;
+}
+
 class _SearchScreenState extends State<SearchScreen> {
   final _c = TextEditingController();
   String _q = '';
+
+  /// Índice del agente (sello, país, géneros, letras) por artista|título.
+  Map<String, Map<String, dynamic>> _extra = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadExtra();
+  }
+
+  Future<void> _loadExtra() async {
+    try {
+      final j = await AgentFiles.readJson('buscar.json');
+      final m = <String, Map<String, dynamic>>{};
+      for (final e in (j?['albums'] as List? ?? const [])) {
+        if (e is Map) m[AgentIndex.key('${e['artista']}', '${e['titulo']}')] = e.cast<String, dynamic>();
+      }
+      if (mounted && m.isNotEmpty) setState(() => _extra = m);
+    } catch (_) {}
+  }
 
   static String _n(String s) {
     const from = 'áàäâãéèëêíìïîóòöôõúùüûñç';
@@ -45,17 +73,33 @@ class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
-  (List<_Hit>, List<_Hit>) _search() {
+  (List<_Hit>, List<_Hit>, List<_Lyr>) _search() {
     final words = _n(_q).split(' ').where((w) => w.isNotEmpty).toList();
-    if (words.isEmpty) return (const [], const []);
+    if (words.isEmpty) return (const [], const [], const []);
     bool all(String hay) => words.every(hay.contains);
     final discs = <_Hit>[];
     final tracks = <_Hit>[];
+    final lyrics = <_Lyr>[];
     final seen = <String>{};
     for (final v in widget.store.items) {
       if (v.isDivider || !seen.add(v.id)) continue;
-      if (all(_n('${v.artist} ${v.title} ${v.genre ?? ''} ${v.year > 0 ? v.year : ''}'))) {
+      final x = _extra[AgentIndex.key(v.artist, v.title)];
+      final meta = x == null ? '' : ' ${x['sello'] ?? ''} ${x['pais'] ?? ''} ${(x['generos'] as List? ?? const []).join(' ')}';
+      if (all(_n('${v.artist} ${v.title} ${v.genre ?? ''} ${v.year > 0 ? v.year : ''}$meta'))) {
         discs.add(_Hit(v, null));
+      }
+      if (x != null && lyrics.length < 40) {
+        for (final l in (x['letras'] as List? ?? const [])) {
+          if (l is! Map) continue;
+          final raw = '${l['texto']}';
+          final t = _n(raw);
+          if (!all(t)) continue;
+          final at = t.indexOf(words.first);
+          final from = (at - 30).clamp(0, t.length);
+          final to = (at + 70).clamp(0, t.length);
+          lyrics.add(_Lyr(v, '${l['tema']}', '…${t.substring(from, to)}…'));
+          break;
+        }
       }
       for (var i = 0; i < v.tracks.length && tracks.length < 80; i++) {
         if (!v.hasAudio) break;
@@ -63,7 +107,7 @@ class _SearchScreenState extends State<SearchScreen> {
       }
     }
     discs.sort((a, b) => a.v.artist.toLowerCase().compareTo(b.v.artist.toLowerCase()));
-    return (discs.take(60).toList(), tracks);
+    return (discs.take(60).toList(), tracks, lyrics);
   }
 
   /// Abre la biblioteca (anillo) que contiene el disco, posicionada en él; no reproduce.
@@ -80,7 +124,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final (discs, tracks) = _search();
+    final (discs, tracks, lyrics) = _search();
     return Scaffold(
       backgroundColor: AppColors.ink,
       appBar: AppBar(
@@ -90,7 +134,7 @@ class _SearchScreenState extends State<SearchScreen> {
           autofocus: true,
           textInputAction: TextInputAction.search,
           decoration: InputDecoration(
-            hintText: 'Buscar artista, disco o tema',
+            hintText: 'Buscar artista, disco, tema, sello, letra…',
             border: InputBorder.none,
             suffixIcon: _q.isEmpty
                 ? null
@@ -113,7 +157,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     textAlign: TextAlign.center, style: TextStyle(color: Colors.white60)),
               ),
             )
-          : (discs.isEmpty && tracks.isEmpty)
+          : (discs.isEmpty && tracks.isEmpty && lyrics.isEmpty)
               ? const Center(child: Text('Sin resultados', style: TextStyle(color: Colors.white60)))
               : ListView(
                   children: [
@@ -134,6 +178,15 @@ class _SearchScreenState extends State<SearchScreen> {
                         subtitle: Text('${h.v.artist} · ${h.v.title}', maxLines: 1, overflow: TextOverflow.ellipsis),
                         trailing: const Icon(Icons.library_music_outlined),
                         onTap: () => _showInLibrary(h.v),
+                      ),
+                    if (lyrics.isNotEmpty) _head('Letras (${lyrics.length})'),
+                    for (final l in lyrics)
+                      ListTile(
+                        leading: SizedBox(width: 48, height: 48, child: CoverArt(vinyl: l.v)),
+                        title: Text('${l.tema} · ${l.v.artist}', maxLines: 1, overflow: TextOverflow.ellipsis),
+                        subtitle: Text(l.frag, maxLines: 2, overflow: TextOverflow.ellipsis),
+                        trailing: const Icon(Icons.lyrics_outlined),
+                        onTap: () => _showInLibrary(l.v),
                       ),
                   ],
                 ),
