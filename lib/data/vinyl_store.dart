@@ -258,9 +258,11 @@ class VinylStore extends ChangeNotifier {
     final e = _edits[v.id];
     if (e == null) return v;
     final t = e['tracks'];
+    final y = e['year'];
     return v.copyWith(
       title: e['title'] as String?,
       artist: e['artist'] as String?,
+      year: y is num && y > 0 ? y.toInt() : null,
       tracks: t is List && t.length == v.tracks.length ? t.cast<String>() : null,
     );
   }
@@ -268,10 +270,25 @@ class VinylStore extends ChangeNotifier {
   /// El usuario corrige el nombre, el artista o los temas de un disco (o tema suelto).
   Future<void> editNames(String id, {String? title, String? artist, List<String>? tracks}) async {
     final e = <String, dynamic>{
+      if (_edits[id]?['year'] != null) 'year': _edits[id]!['year'],
       if (title != null && title.trim().isNotEmpty) 'title': title.trim(),
       if (artist != null && artist.trim().isNotEmpty) 'artist': artist.trim(),
       if (tracks != null) 'tracks': [for (final t in tracks) t.trim()],
     };
+    _edits = {..._edits, id: e};
+    await _prefs?.setString('name_edits_v1', jsonEncode(_edits));
+    _items = [for (final v in _items) v.id == id ? _applyEdit(v) : v];
+    notifyListeners();
+    await _save();
+  }
+
+  /// Datos corregidos desde la ficha de información (año, título, artista): quedan en la app
+  /// y se aplican siempre, también tras sincronizar la nube.
+  Future<void> setMeta(String id, {int? year, String? title, String? artist}) async {
+    final e = Map<String, dynamic>.from(_edits[id] ?? const {});
+    if (year != null && year > 0) e['year'] = year;
+    if (title != null && title.trim().isNotEmpty) e['title'] = title.trim();
+    if (artist != null && artist.trim().isNotEmpty) e['artist'] = artist.trim();
     _edits = {..._edits, id: e};
     await _prefs?.setString('name_edits_v1', jsonEncode(_edits));
     _items = [for (final v in _items) v.id == id ? _applyEdit(v) : v];

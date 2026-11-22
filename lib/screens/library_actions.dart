@@ -18,7 +18,8 @@ import 'cover_suggest_screen.dart';
 import 'custom_discs_screen.dart';
 import 'ipod_screen.dart';
 import 'cloud_space_screen.dart';
-import 'objects3d_screen.dart';
+import '../data/objetos3d_flag.dart';
+import 'agent_objects_screen.dart';
 
 /// Abre la pantalla del disco (tocadisco, deck o cinta abierta, según el reproductor elegido).
 Future<void> openStage(BuildContext context, VinylStore store, Vinyl v) {
@@ -108,13 +109,26 @@ Future<void> showLibrarySettings(BuildContext context, {VinylStore? store}) asyn
               subtitle: const Text('Arma discos y cassettes con collage de portada', style: TextStyle(fontSize: 12)),
               onTap: () => Navigator.of(ctx).push(MaterialPageRoute<void>(builder: (_) => CustomDiscsScreen(store: store!))),
             ),
-            ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.view_in_ar),
-              title: const Text('Objetos 3D'),
-              subtitle: const Text('Elige discos y cassettes: trasera y etiqueta', style: TextStyle(fontSize: 12)),
-              onTap: () => Navigator.of(ctx).push(MaterialPageRoute<void>(builder: (_) => Objects3DScreen(store: store!))),
+            ValueListenableBuilder<bool>(
+              valueListenable: Objetos3dFlag.enabled,
+              builder: (_, on, __) => Column(children: [
+                SwitchListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  secondary: const Icon(Icons.view_in_ar),
+                  title: const Text('Objetos 3D'),
+                  subtitle: const Text('Discos y cassettes hechos por el agente 3D', style: TextStyle(fontSize: 12)),
+                  value: on,
+                  onChanged: Objetos3dFlag.set,
+                ),
+                if (on)
+                  ListTile(
+                    dense: true,
+                    contentPadding: const EdgeInsets.only(left: 40),
+                    title: const Text('Ver objetos 3D'),
+                    onTap: () => Navigator.of(ctx).push(MaterialPageRoute<void>(builder: (_) => AgentObjectsScreen(store: store!))),
+                  ),
+              ]),
             ),
             ListTile(
               dense: true,

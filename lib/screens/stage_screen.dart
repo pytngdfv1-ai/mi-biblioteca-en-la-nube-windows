@@ -33,6 +33,8 @@ import '../theme.dart';
 import '../widgets/cover_tint.dart';
 import 'back_cover_screen.dart';
 import 'booklet_screen.dart';
+import '../data/objetos3d_flag.dart';
+import 'agent_objects_screen.dart';
 import 'info_screen.dart';
 import 'lyrics_sheet.dart';
 import 'move_dialog.dart';
@@ -916,7 +918,10 @@ class _Back extends StatelessWidget {
 
 /// Ficha del disco: colección, lista de pistas y eliminar.
 class DetailSheet extends StatelessWidget {
-  const DetailSheet({super.key, required this.store, required this.vinyl});
+  DetailSheet({super.key, required this.store, required this.vinyl});
+
+  /// Menú de 3 rayas abierto/cerrado (cerrado por defecto: la lista de temas queda a la vista).
+  final ValueNotifier<bool> _menu = ValueNotifier<bool>(false);
 
   final VinylStore store;
   final Vinyl vinyl;
@@ -972,7 +977,7 @@ class DetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: store,
+      animation: Listenable.merge([store, _menu]),
       builder: (context, _) {
         final v = store.items.firstWhere((e) => e.id == vinyl.id, orElse: () => vinyl);
         return SafeArea(
@@ -982,6 +987,13 @@ class DetailSheet extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                 Text(
                   v.cassette ? v.artist : v.artist.toUpperCase(),
                   style: v.cassette
@@ -995,13 +1007,24 @@ class DetailSheet extends StatelessWidget {
                       : const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
                 ),
                 Text(v.yearLabel, style: const TextStyle(color: Colors.white60)),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Menú',
+                      icon: Icon(_menu.value ? Icons.close : Icons.menu),
+                      onPressed: () => _menu.value = !_menu.value,
+                    ),
+                  ],
+                ),
+                if (_menu.value) ...[
                 const SizedBox(height: 10),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.tonalIcon(
                     icon: const Icon(Icons.article_outlined),
                     label: const Text('Información completa y letras'),
-                    onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => InfoScreen(vinyl: v))),
+                    onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => InfoScreen(vinyl: v, store: store))),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -1206,6 +1229,18 @@ class DetailSheet extends StatelessWidget {
                       },
                     ),
                   ),
+                ],
+                if (Objetos3dFlag.enabled.value) ...[
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.view_in_ar),
+                      label: const Text('Ver objetos 3D'),
+                      onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => AgentObjectViewer(vinyl: v))),
+                    ),
+                  ),
+                ],
                 ],
                 const SizedBox(height: 16),
                 const Text('LISTA DE PISTAS', style: TextStyle(color: Colors.white60, fontSize: 12)),

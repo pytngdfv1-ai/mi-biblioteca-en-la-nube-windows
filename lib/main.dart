@@ -1,4 +1,5 @@
 import 'data/objects3d.dart';
+import 'data/objetos3d_flag.dart';
 import 'data/objects3d_queue.dart';
 import 'data/auto_backup.dart';
 import 'screens/splash_screen.dart';
@@ -55,6 +56,7 @@ Future<void> main() async {
   await BookletLite.load();
   await KoofrAccounts.load();
   await Objects3D.load();
+  await Objetos3dFlag.load();
   await CustomDiscs.load();
   await AutoBackup.init(store);
   await Playlists.instance.load();
@@ -69,7 +71,8 @@ Future<void> main() async {
     await Objects3D.sync(store.items);
     // Lo elegido que aún no tiene objeto se genera solo, en segundo plano.
     final sel = Objects3D.selected.value;
-    Objects3DQueue.add(todo: [for (final v in store.items) if (sel.contains(v.id) && !Objects3D.has(v.id)) v]);
+    // Los objetos 3D ahora los hace el agente 3D; la generación en el equipo queda apagada.
+    if (sel.isNotEmpty && false) Objects3DQueue.add(todo: [for (final v in store.items) if (sel.contains(v.id) && !Objects3D.has(v.id)) v]);
   });
   // Busca actualizaciones en segundo plano.
   initUpdater();

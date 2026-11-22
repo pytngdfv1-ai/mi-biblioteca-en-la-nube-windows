@@ -6,7 +6,7 @@ import 'koofr_settings.dart';
 /// Archivos que el agente deja en la nube (_agente/…): índice, versión, etc.
 class AgentFiles {
   /// Lee un JSON de la carpeta _agente de la primera cuenta que lo tenga (null si no existe).
-  static Future<Map<String, dynamic>?> readJson(String name) async {
+  static Future<Map<String, dynamic>?> readJson(String name, {String dir = '_agente'}) async {
     for (final a in KoofrAccounts.list) {
       final f = a.folder.trim();
       for (final folder in {f, f.replaceAll('ú', 'u'), f.replaceAll('u', 'ú'), 'Musica', 'Música'}) {
@@ -15,7 +15,7 @@ class AgentFiles {
           final u = base.replace(pathSegments: [
             ...base.pathSegments.where((s) => s.isNotEmpty),
             ...folder.split('/').where((s) => s.isNotEmpty),
-            '_agente',
+            dir,
             name,
           ]);
           final raw = utf8.decode(await fetchBytes(KoofrSettings.tag(u.toString(), a.id)));

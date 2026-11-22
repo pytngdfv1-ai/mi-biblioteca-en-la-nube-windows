@@ -194,7 +194,7 @@ class _AgentScreenState extends State<AgentScreen> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No encuentro ese álbum en la biblioteca. Sincroniza la nube.')));
       return;
     }
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => InfoScreen(vinyl: found!, focus: campo)));
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => InfoScreen(vinyl: found!, focus: campo, store: widget.store)));
   }
 
   Widget _pendientesTab() {

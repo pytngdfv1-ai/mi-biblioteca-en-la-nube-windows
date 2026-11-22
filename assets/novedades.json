@@ -1,5 +1,27 @@
 [
  {
+  "v": "1.69",
+  "titulo": "Menú del detalle y objetos 3D del agente",
+  "agrega": [
+   "Detalle del álbum: botón de 3 rayas arriba con todas las opciones; la lista de temas queda a la vista",
+   "Objetos 3D hechos por el agente 3D (LP, vinilo 7\" y cassette): se ven desde la nube, giran al arrastrar y se saca o guarda el disco con un toque",
+   "Ajustes: interruptor Objetos 3D (apagado por defecto)",
+   "Se acabó la pantalla en negro: ya no se dibuja en el teléfono"
+  ],
+  "quita": [
+   "Generación de objetos 3D dentro del teléfono"
+  ]
+ },
+ {
+  "v": "1.68",
+  "titulo": "Corrección del año",
+  "agrega": [
+   "El año (y título/artista) editado en la ficha ahora también se actualiza en la app y se conserva al sincronizar",
+   "Al abrir la ficha, si album.json ya tiene un año corregido, la app lo adopta"
+  ],
+  "quita": []
+ },
+ {
   "v": "1.67",
   "titulo": "Ficha de información y avisos",
   "agrega": [
