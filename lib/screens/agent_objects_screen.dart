@@ -25,6 +25,20 @@ class _AgentObjectsScreenState extends State<AgentObjectsScreen> {
   bool _loading = true;
   final List<(Vinyl, String)> _items = [];
   String _q = '';
+  String _resumen = '';
+
+  Future<void> _verInforme(String titulo, String archivo) async {
+    final t = await AgentFiles.readText(archivo, dir: '_agente3d');
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(titulo),
+        content: SingleChildScrollView(child: SelectableText(t ?? 'Aún no hay informe.')),
+        actions: [TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cerrar'))],
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -34,6 +48,25 @@ class _AgentObjectsScreenState extends State<AgentObjectsScreen> {
 
   Future<void> _load() async {
     final j = await AgentFiles.readJson('objetos.json', dir: '_agente3d');
+    var h = 0, e = 0, sp = 0, er = 0;
+    for (final x in (j ?? const {}).values) {
+      if (x is! Map) continue;
+      switch ('${x['estado']}') {
+        case 'hecho' || 'salta':
+          h++;
+        case 'espera':
+          e++;
+        case 'sin_portada':
+          sp++;
+        case 'error':
+          er++;
+      }
+    }
+    final lv = await AgentFiles.readJson('liviano.json', dir: '_agente3d');
+    final nl = (lv?['hecho'] as Map?)?.length ?? 0;
+    _resumen = j == null
+        ? ''
+        : 'Objetos hechos: $h · esperan contraportada: $e · sin portada: $sp · con error: $er\nImágenes convertidas a livianas: $nl';
     final byDir = <String, String>{
       for (final e in (j ?? const {}).entries)
         if (e.value is Map && ((e.value as Map)['estado'] == 'hecho' || (e.value as Map)['estado'] == 'salta' || (e.value as Map)['estado'] == 'espera'))
@@ -65,6 +98,22 @@ class _AgentObjectsScreenState extends State<AgentObjectsScreen> {
                           textAlign: TextAlign.center)),
                 )
               : Column(children: [
+                  if (_resumen.isNotEmpty)
+                    Card(
+                      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          const Text('Lo que hizo el agente 3D', style: TextStyle(fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 4),
+                          Text(_resumen),
+                          Wrap(spacing: 8, children: [
+                            TextButton(onPressed: () => _verInforme('Objetos creados', 'objetos.md'), child: const Text('Informe de objetos')),
+                            TextButton(onPressed: () => _verInforme('Imágenes convertidas', 'liviano.md'), child: const Text('Informe de imágenes')),
+                          ]),
+                        ]),
+                      ),
+                    ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     child: TextField(

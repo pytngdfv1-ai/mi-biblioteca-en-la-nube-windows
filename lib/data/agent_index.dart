@@ -7,9 +7,21 @@ import 'koofr_settings.dart';
 class AgentFiles {
   /// Lee un JSON de la carpeta _agente de la primera cuenta que lo tenga (null si no existe).
   static Future<Map<String, dynamic>?> readJson(String name, {String dir = '_agente'}) async {
+    final t = await readText(name, dir: dir);
+    if (t == null) return null;
+    try {
+      final j = jsonDecode(t);
+      return j is Map<String, dynamic> ? j : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Lee un archivo de texto de la carpeta del agente (null si no existe).
+  static Future<String?> readText(String name, {String dir = '_agente'}) async {
     for (final a in KoofrAccounts.list) {
       final f = a.folder.trim();
-      for (final folder in {f, f.replaceAll('ú', 'u'), f.replaceAll('u', 'ú'), 'Musica', 'Música'}) {
+      for (final folder in {f, f.replaceAll('ú', 'u'), f.replaceAll('u', 'ú'), 'Musica', 'Música', ''}) {
         try {
           final base = Uri.parse(a.baseUrl);
           final u = base.replace(pathSegments: [
@@ -18,9 +30,7 @@ class AgentFiles {
             dir,
             name,
           ]);
-          final raw = utf8.decode(await fetchBytes(KoofrSettings.tag(u.toString(), a.id)));
-          final j = jsonDecode(raw);
-          if (j is Map<String, dynamic>) return j;
+          return utf8.decode(await fetchBytes(KoofrSettings.tag(u.toString(), a.id)));
         } catch (_) {}
       }
     }

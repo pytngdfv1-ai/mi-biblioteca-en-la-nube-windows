@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../screens/novedades_screen.dart';
 import 'agent_index.dart';
@@ -9,6 +10,22 @@ import 'agent_index.dart';
 class UpdateNotice {
   static const current = String.fromEnvironment('APP_VERSION', defaultValue: '');
   static bool _checked = false;
+  static const defaultUrl = 'https://github.com/pytngdfv1-ai/vinyl-solutions-windows/releases/latest';
+
+  /// Abre la página de descarga en el navegador (si no puede, copia el enlace).
+  static Future<void> open(BuildContext context, [String? url]) async {
+    final u = (url == null || url.isEmpty) ? defaultUrl : url;
+    var ok = false;
+    try {
+      ok = await launchUrl(Uri.parse(u), mode: LaunchMode.externalApplication);
+    } catch (_) {}
+    if (!ok) {
+      await Clipboard.setData(ClipboardData(text: u));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enlace copiado: pégalo en el navegador')));
+      }
+    }
+  }
 
   static List<int> _parts(String v) => [for (final p in v.split('.')) int.tryParse(p) ?? 0];
 
@@ -22,7 +39,9 @@ class UpdateNotice {
   }
 
   static Future<void> check(BuildContext context) async {
-    if (_checked || current.isEmpty) return;
+    // En Windows las actualizaciones las gestiona el actualizador propio (WinSparkle);
+    // version.json del agente es de la app de Android.
+    if (true || _checked || current.isEmpty) return;
     _checked = true;
     try {
       final j = await AgentFiles.readJson('version.json');
@@ -48,11 +67,10 @@ class UpdateNotice {
           ),
           TextButton(
             onPressed: () {
-              Clipboard.setData(ClipboardData(text: url));
               m.hideCurrentMaterialBanner();
-              m.showSnackBar(const SnackBar(content: Text('Enlace de descarga copiado: pégalo en el navegador')));
+              open(context, url);
             },
-            child: const Text('Copiar enlace'),
+            child: const Text('Descargar'),
           ),
           TextButton(
             onPressed: () {
