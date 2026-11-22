@@ -1,5 +1,56 @@
 [
  {
+  "v": "1.76",
+  "titulo": "Aviso de versión al instante",
+  "agrega": [
+   "El aviso de versión nueva se publica apenas sale la actualización (antes dependía de la corrida diaria del agente)"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.75",
+  "titulo": "Etiquetas iguales y disco con el icono de la app",
+  "agrega": [
+   "Visor 3D del cassette: etiqueta igual a la del reproductor (letra cursiva azul, franja con la portada, A/B, NORMAL)",
+   "Menú Discos: el disco 3D lleva el icono de la app en la etiqueta"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.74",
+  "titulo": "Enlace para actualizar",
+  "agrega": [
+   "Pantalla de carga y aviso de versión nueva: botón Descargar que abre la página de la última versión"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.73",
+  "titulo": "Cassette real, versión en la carga y sync en segundo plano",
+  "agrega": [
+   "Visor 3D: el cassette que sale de la caja ahora es un cassette de verdad (carcasa, etiqueta, ventana con carretes y base), con lado A y B",
+   "Pantalla de carga: muestra la versión de la app y avisa si hay una actualización",
+   "Sincronizar todas las nubes ahora corre en segundo plano y puedes seguir usando la app"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.72",
+  "titulo": "Corrección: informes del agente 3D",
+  "agrega": [
+   "Ajustes → Objetos 3D ahora encuentra los objetos y el resumen del agente 3D aunque estén fuera de la carpeta de música"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.71",
+  "titulo": "Resumen del agente 3D en la app",
+  "agrega": [
+   "Ajustes → Objetos 3D: cuadro con lo que hizo el agente 3D (objetos hechos, pendientes, imágenes convertidas) e informes completos"
+  ],
+  "quita": []
+ },
+ {
   "v": "1.70",
   "titulo": "Búsqueda global, mezclas del agente y libretos",
   "agrega": [

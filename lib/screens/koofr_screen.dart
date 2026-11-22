@@ -16,9 +16,6 @@ class KoofrScreen extends StatefulWidget {
 }
 
 class _KoofrScreenState extends State<KoofrScreen> {
-  bool _busy = false;
-  String _status = '';
-
   Future<void> _open([KoofrSettings? a]) async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -28,26 +25,12 @@ class _KoofrScreenState extends State<KoofrScreen> {
     if (mounted) setState(() {});
   }
 
-  Future<void> _syncAll() async {
-    setState(() {
-      _busy = true;
-      _status = 'Sincronizando…';
-    });
-    final lines = <String>[];
-    for (final a in List.of(KoofrAccounts.list)) {
-      if (mounted) setState(() => _status = 'Sincronizando ${a.name}…');
-      try {
-        final r = await LibrarySync.syncAccount(a, widget.store);
-        lines.add('${a.name}: ${r.split('\n').first}');
-      } catch (e) {
-        lines.add('${a.name}: $e');
-      }
-    }
-    if (!mounted) return;
-    setState(() {
-      _busy = false;
-      _status = lines.join('\n');
-    });
+  /// Sincroniza en segundo plano: no bloquea la pantalla y se puede salir; el aviso aparece en el menú.
+  void _syncAll() {
+    LibrarySync.syncAll(widget.store);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sincronizando en segundo plano. Puedes seguir usando la app.')),
+    );
   }
 
   @override
@@ -91,25 +74,22 @@ class _KoofrScreenState extends State<KoofrScreen> {
             FilledButton.icon(
               icon: const Icon(Icons.add),
               label: const Text('Agregar cuenta'),
-              onPressed: _busy ? null : () => _open(),
+              onPressed: () => _open(),
             ),
             if (accounts.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
-                child: OutlinedButton.icon(
-                  icon: _busy
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.sync),
-                  label: const Text('Sincronizar todas'),
-                  onPressed: _busy ? null : _syncAll,
+                child: ValueListenableBuilder<String?>(
+                  valueListenable: LibrarySync.busy,
+                  builder: (_, b, __) => OutlinedButton.icon(
+                    icon: b != null
+                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.sync),
+                    label: Text(b ?? 'Sincronizar todas'),
+                    onPressed: b != null ? null : _syncAll,
+                  ),
                 ),
               ),
-            const SizedBox(height: 12),
-            Text(_status),
           ],
         ),
       ),

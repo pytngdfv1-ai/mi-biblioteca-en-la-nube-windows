@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+import '../data/cassette_face.dart';
 import '../data/objects3d.dart';
 import '../models/vinyl.dart';
 import '../widgets/mini3d.dart';
@@ -28,7 +29,7 @@ class _ObjectViewerScreenState extends State<ObjectViewerScreen> with TickerProv
   Offset _pan = Offset.zero;
   bool _rotated = false;
 
-  ui.Image? _front, _back, _label, _discFace;
+  ui.Image? _front, _back, _label, _discFace, _tapeA, _tapeB;
   bool _ready = false;
 
   Vinyl get v => widget.vinyl;
@@ -46,6 +47,10 @@ class _ObjectViewerScreenState extends State<ObjectViewerScreen> with TickerProv
       _back = await Objects3D.backImage(v, tape: _tape);
       _label = await Objects3D.labelImage(v, tape: _tape);
       if (!_tape) _discFace = await _makeDiscFace(_label);
+      if (_tape) {
+        _tapeA = await CassetteFace.build(v, cover: _front);
+        _tapeB = await CassetteFace.build(v, side: 'B', cover: _front);
+      }
     } catch (_) {}
     if (mounted) setState(() => _ready = true);
   }
@@ -114,7 +119,7 @@ class _ObjectViewerScreenState extends State<ObjectViewerScreen> with TickerProv
       final ty = (-0.1 - 1.45 * o);
       return [
         if (o > 0.001)
-          ...box3(V3(0, ty, 0), 1.05, .62, .1, front: _label, side: const Color(0xFF16161A), frontColor: const Color(0xFFEDE6D2), backColor: const Color(0xFF16161A)),
+          ...box3(V3(0, ty, 0), 1.1, .693, .1, front: _tapeA ?? _label, back: _tapeB, side: const Color(0xFF16161A), frontColor: const Color(0xFF2A2A30), backColor: const Color(0xFF2A2A30)),
         ...box3(V3(0, 0, 0), cw, ch, cd,
             front: _front,
             frontUv: _front == null ? null : coverUv(_front!, cw / ch),

@@ -2,7 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../data/agent_index.dart';
 import '../data/library_sync.dart';
+import '../data/update_notice.dart';
 import '../data/vinyl_store.dart';
 import 'home_screen.dart';
 
@@ -24,14 +26,31 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   double _finish = -1; // segundos en que terminó la carga
   double _p = 0; // avance mostrado (suavizado)
   bool _skip = false;
+  String _nueva = '';
+  String _nuevaUrl = '';
 
   @override
   void initState() {
     super.initState();
     Future.any<void>([widget.ready, Future<void>.delayed(const Duration(seconds: 40))]).whenComplete(() {
       _ready = true;
+      if (_nueva.isEmpty) _checkVersion();
     });
+    _checkVersion();
     _c.addListener(_tick);
+  }
+
+  Future<void> _checkVersion() async {
+    try {
+      final j = await AgentFiles.readJson('version.json');
+      final ver = (j?['version'] ?? '').toString();
+      if (false && ver.isNotEmpty && UpdateNotice.current.isNotEmpty && UpdateNotice.isNewer(ver, UpdateNotice.current) && mounted) {
+        setState(() {
+          _nueva = ver;
+          _nuevaUrl = (j?['url'] ?? '').toString();
+        });
+      }
+    } catch (_) {}
   }
 
   void _tick() {
@@ -129,6 +148,21 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                             style: const TextStyle(color: Color(0x99EBDDBF), fontSize: 12),
                           ),
                         ),
+                        const SizedBox(height: 6),
+                        Text(
+                          UpdateNotice.current.isEmpty ? 'Versión de desarrollo' : 'Versión ${UpdateNotice.current}',
+                          style: const TextStyle(color: Color(0x99EBDDBF), fontSize: 12),
+                        ),
+                        if (_nueva.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: TextButton.icon(
+                              onPressed: () => UpdateNotice.open(context, _nuevaUrl),
+                              icon: const Icon(Icons.download, size: 18, color: Color(0xFFE8C14A)),
+                              label: Text('Actualización disponible: $_nueva · Descargar',
+                                  style: const TextStyle(color: Color(0xFFE8C14A), fontSize: 13, fontWeight: FontWeight.w600)),
+                            ),
+                          ),
                         SizedBox(
                           height: 40,
                           child: t > 4 && !_ready
