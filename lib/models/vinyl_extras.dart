@@ -39,5 +39,5 @@ bool isAgentImage(String url) {
   try {
     n = Uri.decodeComponent(n);
   } catch (_) {}
-  return RegExp(r'^(sello|cassette)\.', caseSensitive: false).hasMatch(n);
+  return RegExp(r'^((sello|cassette)\.|objeto3d)', caseSensitive: false).hasMatch(n);
 }

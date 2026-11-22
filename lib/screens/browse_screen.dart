@@ -71,7 +71,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
             OutlinedButton.icon(
               icon: const Icon(Icons.article_outlined),
               label: const Text('Info'),
-              onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => InfoScreen(vinyl: v))),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => InfoScreen(vinyl: v, store: widget.store))),
             ),
             const SizedBox(width: 10),
             OutlinedButton.icon(

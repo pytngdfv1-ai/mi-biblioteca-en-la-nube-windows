@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../data/album_json.dart';
 import '../data/lyrics.dart';
+import '../data/vinyl_store.dart';
 import '../models/vinyl.dart';
 import '../widgets/cover_art.dart';
 
 /// Ficha completa del álbum o tema: metadatos editables (se guardan en album.json de la carpeta),
 /// lo que falta, la lista de temas y sus letras. [focus] lleva directo al campo que falta.
 class InfoScreen extends StatefulWidget {
-  const InfoScreen({super.key, required this.vinyl, this.focus});
+  const InfoScreen({super.key, required this.vinyl, this.focus, this.store});
+  final VinylStore? store;
   final Vinyl vinyl;
   final String? focus;
 
@@ -74,6 +76,9 @@ class _InfoScreenState extends State<InfoScreen> {
     }
     if (k0(j['generos']).isEmpty && (v.genre ?? '').isNotEmpty) _ctl['generos']!.text = v.genre!;
     _dirty = false;
+    // Si el año ya está corregido en album.json pero la app aún muestra otro, se actualiza.
+    final jy = (j['año'] as num?)?.toInt() ?? 0;
+    if (jy > 0 && jy != v.year) await widget.store?.setMeta(v.id, year: jy);
     if (mounted) setState(() => _loading = false);
     WidgetsBinding.instance.addPostFrameCallback((_) => _goFocus());
   }
@@ -108,7 +113,11 @@ class _InfoScreenState extends State<InfoScreen> {
     try {
       final ok = await _aj!.save(ch);
       msg = ok ? 'Guardado en la nube' : 'No se pudo guardar';
-      if (ok) _dirty = false;
+      if (ok) {
+        _dirty = false;
+        await widget.store?.setMeta(v.id,
+            year: int.tryParse(_ctl['año']!.text.trim()), title: _ctl['titulo']!.text, artist: _ctl['artista']!.text);
+      }
     } catch (_) {
       msg = 'No se pudo guardar (¿sin conexión?)';
     }
