@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../audio/dj_session.dart';
+import '../data/agent_index.dart';
 import '../data/playlists.dart';
+import '../data/vinyl_store.dart';
 import '../theme.dart';
 import '../widgets/cover_art.dart';
 import 'dj_live_screen.dart';
@@ -67,7 +69,61 @@ Future<void> showAddToPlaylist(BuildContext context, PlEntry e) async {
 
 /// Lista de playlists.
 class PlaylistsScreen extends StatelessWidget {
-  const PlaylistsScreen({super.key});
+  const PlaylistsScreen({super.key, this.vinyls});
+
+  /// Biblioteca, para armar las mezclas que sugiere el agente.
+  final VinylStore? vinyls;
+
+  Future<void> _agentMixes(BuildContext context) async {
+    final st = vinyls;
+    final m = ScaffoldMessenger.of(context);
+    final j = await AgentFiles.readJson('mezclas.json');
+    final list = [for (final e in (j?['mezclas'] as List? ?? const [])) if (e is Map) e.cast<String, dynamic>()];
+    if (list.isEmpty || st == null) {
+      m.showSnackBar(const SnackBar(content: Text('El agente aún no preparó mezclas')));
+      return;
+    }
+    if (!context.mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => ListView(
+        children: [
+          const ListTile(title: Text('Mezclas del agente'), subtitle: Text('Toca una para crear la playlist')),
+          for (final e in list)
+            ListTile(
+              leading: const Icon(Icons.auto_awesome),
+              title: Text('${e['nombre']}'),
+              subtitle: Text('${e['descripcion']}'),
+              onTap: () async {
+                Navigator.of(ctx).pop();
+                final byKey = {
+                  for (final v in st.items)
+                    if (!v.isDivider && v.hasAudio) AgentIndex.key(v.artist, v.title): v,
+                };
+                final entries = <PlEntry>[];
+                for (final a in (e['albums'] as List? ?? const [])) {
+                  final v = byKey[AgentIndex.key('${(a as Map)['artista']}', '${a['titulo']}')];
+                  if (v == null) continue;
+                  for (var i = 0; i < v.trackUrls.length && i < 3; i++) {
+                    entries.add(PlEntry.of(v, i));
+                  }
+                }
+                if (entries.isEmpty) {
+                  m.showSnackBar(const SnackBar(content: Text('No encontré esos discos con audio')));
+                  return;
+                }
+                entries.shuffle();
+                final p = await Playlists.instance.create('${e['nombre']}');
+                for (final x in entries) {
+                  await Playlists.instance.add(p.id, x);
+                }
+                m.showSnackBar(SnackBar(content: Text('Playlist creada: ${entries.length} temas')));
+              },
+            ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +136,11 @@ class PlaylistsScreen extends StatelessWidget {
           backgroundColor: AppColors.ink,
           title: const Text('Playlists'),
           actions: [
+            IconButton(
+              tooltip: 'Mezclas del agente',
+              icon: const Icon(Icons.auto_awesome),
+              onPressed: () => _agentMixes(context),
+            ),
             IconButton(
               tooltip: 'Nueva playlist',
               icon: const Icon(Icons.add),

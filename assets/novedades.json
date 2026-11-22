@@ -1,5 +1,15 @@
 [
  {
+  "v": "1.70",
+  "titulo": "Búsqueda global, mezclas del agente y libretos",
+  "agrega": [
+   "Búsqueda global: también por sello, país, género y por frases de las letras",
+   "Mezclas del agente: sugiere playlists por década, idioma y género (botón de estrella en Playlists)",
+   "Libretos y contraportadas: ahora también se ven en los temas sueltos"
+  ],
+  "quita": []
+ },
+ {
   "v": "1.69",
   "titulo": "Menú del detalle y objetos 3D del agente",
   "agrega": [

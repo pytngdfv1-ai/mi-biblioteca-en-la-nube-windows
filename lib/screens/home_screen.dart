@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
             () => _push(ModeScreen(store: widget.store, mode: PlayMode.disc))),
         MenuRingItem('Deck de cassettes', 'Álbumes y sueltos en cassette', MenuIconKind.deck, 'cassette_player',
             () => _push(ModeScreen(store: widget.store, mode: PlayMode.cassette))),
-        MenuRingItem('Bandejas DJ', 'Mezcla tus playlists', MenuIconKind.dj, 'dj', () => _push(const PlaylistsScreen())),
+        MenuRingItem('Bandejas DJ', 'Mezcla tus playlists', MenuIconKind.dj, 'dj', () => _push(PlaylistsScreen(vinyls: widget.store))),
         MenuRingItem('Cinta abierta', 'Reproduce todo', MenuIconKind.reel, 'melodia',
             () => _push(ModeScreen(store: widget.store, mode: PlayMode.reel))),
         MenuRingItem('iPod', 'Rueda y pantalla', MenuIconKind.ipod, 'ipod',
@@ -283,7 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     case 'about':
                       _push(const AboutScreen());
                     case 'playlists':
-                      _push(const PlaylistsScreen());
+                      _push(PlaylistsScreen(vinyls: widget.store));
                     case 'dups':
                       _push(DuplicatesScreen(store: widget.store));
                     case 'newfolder':

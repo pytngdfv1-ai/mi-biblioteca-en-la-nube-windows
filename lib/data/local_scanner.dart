@@ -69,7 +69,7 @@ class LocalScanner {
         names = names.sublist(1);
       }
       final src = group == null ? 'local' : 'local:$group';
-      final images = list.where((f) => _hasExt(f.path, _imageExt)).toList();
+      final images = list.where((f) => _hasExt(f.path, _imageExt) && !isAgentFileName(_base(f.path))).toList();
       final pref = RegExp(r'^(cover|folder|front|album|artwork|portada|car[aá]tula)(\s*(\d+|hd))?\.', caseSensitive: false);
       File? art;
       for (final f in images) {
@@ -119,7 +119,7 @@ class LocalScanner {
       for (final sub in dirs.where((d) => Paths.within(dir, d) && isBookletDir(_base(d)))) {
         if (!Paths.isDirectChild(dir, sub)) continue; // solo hijas directas
         final sl = byDir[sub]!;
-        imgs.addAll(sl.where((f) => _hasExt(f.path, _imageExt))
+        imgs.addAll(sl.where((f) => _hasExt(f.path, _imageExt) && !isAgentFileName(_base(f.path)))
             .toList()..sort((a, b) => naturalCompare(_base(a.path), _base(b.path))));
         pdfs.addAll(sl.where((f) => _hasExt(f.path, const ['.pdf']))
             .toList()..sort((a, b) => naturalCompare(_base(a.path), _base(b.path))));

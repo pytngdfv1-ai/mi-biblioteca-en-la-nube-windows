@@ -33,9 +33,18 @@ String trackTitle(String file, {String? artist}) {
 
 int yearOf(String? s) {
   if (s == null) return 0;
-  final m = RegExp(r'(19|20)\d{2}').firstMatch(s);
-  return m == null ? 0 : int.parse(m.group(0)!);
+  // Año de 4 cifras suelto (no parte de un número más largo) y razonable: un año 2047 es un dato mal leído.
+  final max = DateTime.now().year + 1;
+  for (final m in RegExp(r'(?<!\d)(19|20)\d{2}(?!\d)').allMatches(s)) {
+    final y = int.parse(m.group(0)!);
+    if (y <= max) return y;
+  }
+  return 0;
 }
+
+/// Archivos que dejan los agentes en la carpeta del álbum (no son portada ni libreto).
+bool isAgentFileName(String name) =>
+    RegExp(r'^((sello|cassette)\.|objeto3d)', caseSensitive: false).hasMatch(name);
 
 /// Orden "natural": 2 antes que 10.
 int naturalCompare(String a, String b) {
