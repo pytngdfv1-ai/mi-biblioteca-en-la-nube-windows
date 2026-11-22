@@ -10,6 +10,8 @@ import '../data/vinyl_store.dart';
 import 'cover_studio_screen.dart';
 import 'cover_suggest_screen.dart';
 import 'equalizer_screen.dart';
+import '../data/update_notice.dart';
+import 'menu_ring_screen.dart';
 import 'mode_screen.dart';
 import '../data/play_mode.dart';
 import '../widgets/menu_icons.dart';
@@ -19,6 +21,8 @@ import '../data/ui_settings.dart';
 import '../widgets/ring_360.dart';
 import '../data/koofr_settings.dart';
 import 'about_screen.dart';
+import 'guide_screen.dart';
+import 'browse_screen.dart';
 import 'duplicates_screen.dart';
 import 'playlist_screens.dart';
 import 'search_screen.dart';
@@ -53,7 +57,11 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _releaseTilt = Tilt.instance.acquire();
     LibrarySync.newCount.addListener(_announceNew);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _announceNew());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _announceNew();
+      GuideScreen.showFirstTime(context);
+      UpdateNotice.check(context);
+    });
   }
 
   void _announceNew() {
@@ -112,40 +120,51 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Menú principal en anillo 360°: solo iconos 3D.
   static const _menuItems = <(String, String, MenuIconKind)>[
-    ('Tocadiscos', 'Álbumes y sueltos en disco', MenuIconKind.turntable),
-    ('Deck de cassettes', 'Álbumes y sueltos en cassette', MenuIconKind.deck),
-    ('Bandejas DJ', 'Mezcla tus playlists', MenuIconKind.dj),
-    ('Cinta abierta', 'Reproduce todo', MenuIconKind.reel),
+    ('Reproductores', 'Tocadiscos, deck, DJ, cinta e iPod', MenuIconKind.turntable),
+    ('Bibliotecas', 'En disco o en cassette', MenuIconKind.covers),
+    ('Ajustes', 'Opciones de la app', MenuIconKind.gear),
     ('Buscador de portadas', 'Cover Studio', MenuIconKind.covers),
     ('Buscador de temas y álbumes', 'Busca en tu biblioteca', MenuIconKind.search),
-    ('Ajustes', 'Opciones de la app', MenuIconKind.gear),
     ('Ecualizador', 'Graves, medios y agudos', MenuIconKind.equalizer),
-    ('iPod', 'Rueda y pantalla', MenuIconKind.ipod),
   ];
+
+  void _players() => _push(MenuRingScreen(title: 'Reproductores', items: [
+        MenuRingItem('Tocadiscos', 'Álbumes y sueltos en disco', MenuIconKind.turntable, 'technics',
+            () => _push(ModeScreen(store: widget.store, mode: PlayMode.disc))),
+        MenuRingItem('Deck de cassettes', 'Álbumes y sueltos en cassette', MenuIconKind.deck, 'cassette_player',
+            () => _push(ModeScreen(store: widget.store, mode: PlayMode.cassette))),
+        MenuRingItem('Bandejas DJ', 'Mezcla tus playlists', MenuIconKind.dj, 'dj', () => _push(const PlaylistsScreen())),
+        MenuRingItem('Cinta abierta', 'Reproduce todo', MenuIconKind.reel, 'melodia',
+            () => _push(ModeScreen(store: widget.store, mode: PlayMode.reel))),
+        MenuRingItem('iPod', 'Rueda y pantalla', MenuIconKind.ipod, 'ipod',
+            () => _push(ModeScreen(store: widget.store, mode: PlayMode.ipod))),
+      ]));
+
+  void _libraries() => _push(MenuRingScreen(title: 'Bibliotecas', items: [
+        MenuRingItem('Discos', 'Álbumes, inglés, español y sueltos', MenuIconKind.turntable, 'disc',
+            () => _push(ModeScreen(store: widget.store, mode: PlayMode.disc, titleOverride: 'Bibliotecas · discos'))),
+        MenuRingItem('Cassettes', 'Álbumes, inglés, español y sueltos', MenuIconKind.deck, 'k7',
+            () => _push(ModeScreen(store: widget.store, mode: PlayMode.cassette, titleOverride: 'Bibliotecas · cassettes'))),
+      ]));
+
   void _tool(int i) {
     switch (i) {
       case 0:
-        _push(ModeScreen(store: widget.store, mode: PlayMode.disc));
+        _players();
       case 1:
-        _push(ModeScreen(store: widget.store, mode: PlayMode.cassette));
+        _libraries();
       case 2:
-        _push(const PlaylistsScreen());
-      case 3:
-        _push(ModeScreen(store: widget.store, mode: PlayMode.reel));
-      case 4:
-        _push(CoverStudioScreen(store: widget.store));
-      case 5:
-        _push(SearchScreen(store: widget.store));
-      case 6:
         showLibrarySettings(context, store: widget.store);
-      case 7:
-        _push(const EqualizerScreen());
+      case 3:
+        _push(CoverStudioScreen(store: widget.store));
+      case 4:
+        _push(SearchScreen(store: widget.store));
       default:
-        _push(ModeScreen(store: widget.store, mode: PlayMode.ipod));
+        _push(const EqualizerScreen());
     }
   }
 
-  static const _models3d = <String?>['technics', 'cassette_player', 'dj', 'melodia', 'crate', 'lupa', 'gear', null, 'ipod'];
+  static const _models3d = <String?>['players', 'crate', 'gear', 'covers_search', 'lupa', null];
 
   Widget _ring(List<Cajon> cajones, List<Vinyl> all) {
     const items = _menuItems;
@@ -198,6 +217,16 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: AppColors.ink,
             title: const Text('Mi Biblioteca'),
             actions: [
+              IconButton(
+                tooltip: 'Hojear',
+                icon: const Icon(Icons.grid_view, size: 20),
+                onPressed: () => _push(BrowseScreen(store: widget.store)),
+              ),
+              IconButton(
+                tooltip: 'Guía',
+                icon: const Icon(Icons.help_outline, size: 20),
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GuideScreen())),
+              ),
               ValueListenableBuilder<bool>(
                 valueListenable: Objects3DQueue.busy,
                 builder: (_, b, __) => !b

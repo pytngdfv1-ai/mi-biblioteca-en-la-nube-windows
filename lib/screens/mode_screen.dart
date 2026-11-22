@@ -14,7 +14,8 @@ import 'home_screen.dart';
 /// Un reproductor (tocadiscos, deck o cinta abierta): todas las bibliotecas, vistas y
 /// reproducidas en la versión de ese reproductor.
 class ModeScreen extends StatefulWidget {
-  const ModeScreen({super.key, required this.store, required this.mode});
+  const ModeScreen({super.key, required this.store, required this.mode, this.titleOverride});
+  final String? titleOverride;
   final VinylStore store;
   final PlayMode mode;
 
@@ -35,7 +36,7 @@ class _ModeScreenState extends State<ModeScreen> {
     super.dispose();
   }
 
-  String get _title => switch (widget.mode) {
+  String get _title => widget.titleOverride ?? switch (widget.mode) {
         PlayMode.disc => 'Tocadiscos',
         PlayMode.cassette => 'Deck de cassettes',
         PlayMode.reel => 'Cinta abierta',

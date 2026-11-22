@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../data/equalizer.dart';
+import '../data/levels.dart';
 
 /// Ecualizador funcional con panel plateado: interruptor, 5 bandas con fader y LED, presets.
 class EqualizerScreen extends StatefulWidget {
@@ -88,7 +89,13 @@ class _EqualizerScreenState extends State<EqualizerScreen> {
                                 Text(on ? 'ON' : 'OFF',
                                     style: const TextStyle(color: Color(0xFF22252B), fontWeight: FontWeight.w700, fontSize: 12)),
                                 const Spacer(),
-                                _Needle(level: on ? (g(0).abs() + g(n - 1).abs()) / (2 * pr.maxDecibels) : 0),
+                                ValueListenableBuilder<double>(
+                                  valueListenable: Levels.level,
+                                  builder: (_, l, __) => _Needle(
+                                    level: !on ? 0 : (Levels.live ? l : (g(0).abs() + g(n - 1).abs()) / (2 * pr.maxDecibels)),
+                                    live: on && Levels.live,
+                                  ),
+                                ),
                               ],
                             ),
                             const SizedBox(height: 10),
@@ -193,15 +200,16 @@ class _EqualizerScreenState extends State<EqualizerScreen> {
 
 /// Medidor analógico con aguja (nivel 0 a 1).
 class _Needle extends StatelessWidget {
-  const _Needle({required this.level});
+  const _Needle({required this.level, this.live = false});
   final double level;
+  final bool live;
 
   @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
       tween: Tween(end: level.clamp(0.0, 1.0)),
-      duration: const Duration(milliseconds: 450),
-      curve: Curves.elasticOut,
+      duration: Duration(milliseconds: live ? 80 : 450),
+      curve: live ? Curves.linear : Curves.elasticOut,
       builder: (_, v, __) => CustomPaint(size: const Size(84, 46), painter: _NeedlePainter(v)),
     );
   }

@@ -35,14 +35,20 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icon/
+    - assets/novedades.json
     - assets/models3d/technics/
     - assets/models3d/cassette_player/
     - assets/models3d/dj/
     - assets/models3d/melodia/
     - assets/models3d/crate/
     - assets/models3d/ipod/
+    - assets/models3d/ipod_front.webp
     - assets/models3d/gear/
     - assets/models3d/lupa/
+    - assets/models3d/players/
+    - assets/models3d/covers_search/
+    - assets/models3d/disc/
+    - assets/models3d/k7/
   shaders:
     - shaders/vinyl_sheen.frag
   fonts:

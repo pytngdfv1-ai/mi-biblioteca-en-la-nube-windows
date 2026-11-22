@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/vinyl.dart';
+import '../models/vinyl_extras.dart';
 import 'fetch_bytes.dart';
 import 'koofr_client.dart';
 import 'koofr_settings.dart';
@@ -96,7 +97,7 @@ class BookletLite {
 
   /// ¿Es una página liviana guardada junto al PDF (no un libreto normal)?
   static bool isLitePage(String url) =>
-      Uri.decodeFull(Uri.parse(url).removeFragment().path).contains('/$_prefix');
+      Uri.decodeFull(Uri.parse(url).removeFragment().path).contains('/$_prefix') || isAgentImage(url);
 
   /// Páginas livianas que el disco ya trae de la carpeta (hechas en otro equipo).
   static List<String>? remotePages(Vinyl v, String pdfUrl) {

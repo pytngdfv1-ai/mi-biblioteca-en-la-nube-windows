@@ -27,7 +27,6 @@ class IpodScreen extends StatefulWidget {
 class _IpodScreenState extends State<IpodScreen> {
   final _ps = PlayerService.instance;
   Timer? _timer;
-  bool _dark = false;
   double _vol = 1;
   double _lastAngle = 0;
   double _acc = 0;
@@ -107,8 +106,7 @@ class _IpodScreenState extends State<IpodScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final body = _dark ? const [Color(0xFF3A3A40), Color(0xFF111114)] : const [Color(0xFFF3F3F5), Color(0xFFC9CAD0)];
-    final ink = _dark ? Colors.white : const Color(0xFF55565C);
+    const ink = Color(0xFF16222A);
     final idx = (_ps.player.currentIndex ?? 0).clamp(0, math.max(0, v.tracks.length - 1)).toInt();
     final title = v.tracks.isEmpty ? v.title : v.tracks[idx];
     final pos = _ps.player.position;
@@ -120,111 +118,82 @@ class _IpodScreenState extends State<IpodScreen> {
       appBar: AppBar(backgroundColor: Colors.transparent, title: Text(v.title, maxLines: 1, overflow: TextOverflow.ellipsis)),
       body: Center(
         child: LayoutBuilder(builder: (context, c) {
-          final w = math.min(c.maxWidth - 40, (c.maxHeight - 20) * .6);
-          final h = w / .6;
-          final wheel = w * .74;
-          return Container(
+          final w = math.min(c.maxWidth - 40, (c.maxHeight - 20) * .5683);
+          final h = w / .5683;
+          final wheel = w * .9;
+          final wcx = w * .506, wcy = h * .688;
+          final sx = w * .139, sy = h * .035, sw = w * .73, sh = h * .342;
+          return SizedBox(
             width: w,
             height: h,
-            padding: EdgeInsets.all(w * .06),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(w * .11),
-              gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: body),
-              boxShadow: const [BoxShadow(color: Colors.black87, blurRadius: 24, offset: Offset(0, 12))],
-            ),
-            child: Column(children: [
-              GestureDetector(
-                onLongPress: () => setState(() => _dark = !_dark),
+            child: Stack(children: [
+              // Mismo modelo 3D del icono del menú, vista frontal en alta resolución.
+              Positioned.fill(child: Image.asset('assets/models3d/ipod_front.webp', fit: BoxFit.fill, filterQuality: FilterQuality.high)),
+              // Pantalla funcional
+              Positioned(
+                left: sx, top: sy, width: sw, height: sh,
                 child: Container(
-                  height: h * .36,
-                  padding: EdgeInsets.all(w * .035),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD3E4EA),
-                    borderRadius: BorderRadius.circular(w * .03),
-                    border: Border.all(color: Colors.black54, width: 3),
-                    gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFFE2EFF3), Color(0xFFBCD2DA)]),
-                  ),
+                  padding: EdgeInsets.all(w * .02),
+                  color: const Color(0xFFCDD6C4),
                   child: DefaultTextStyle(
-                    style: const TextStyle(color: Color(0xFF16222A), fontSize: 12),
+                    style: const TextStyle(color: ink, fontSize: 11),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Row(children: [
+                        Icon(_playing ? Icons.play_arrow : Icons.pause, size: 13, color: ink),
+                        const Spacer(),
                         Text(showVol ? 'Volumen' : 'Reproduciendo', style: const TextStyle(fontWeight: FontWeight.w800)),
                         const Spacer(),
-                        Icon(_playing ? Icons.play_arrow : Icons.pause, size: 14, color: const Color(0xFF16222A)),
-                        const Icon(Icons.battery_full, size: 14, color: Color(0xFF16222A)),
+                        const Icon(Icons.battery_full, size: 13, color: ink),
                       ]),
-                      const Divider(height: 8, color: Color(0x5516222A)),
+                      const Divider(height: 6, thickness: 1.5, color: ink),
                       Expanded(
                         child: showVol
-                            ? Center(
-                                child: LinearProgressIndicator(
-                                  value: _vol,
-                                  minHeight: 10,
-                                  color: const Color(0xFF16222A),
-                                  backgroundColor: const Color(0x3316222A),
-                                ),
-                              )
+                            ? Center(child: LinearProgressIndicator(value: _vol, minHeight: 9, color: ink, backgroundColor: const Color(0x3316222A)))
                             : Row(children: [
-                                SizedBox(width: h * .13, height: h * .13, child: CoverArt(vinyl: v, radius: 3)),
-                                const SizedBox(width: 8),
+                                SizedBox(width: sh * .46, height: sh * .46, child: CoverArt(vinyl: v, radius: 1)),
+                                const SizedBox(width: 6),
                                 Expanded(
                                   child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                                    Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
                                     Text(v.artist, maxLines: 1, overflow: TextOverflow.ellipsis),
-                                    Text('${idx + 1} de ${v.tracks.length}', style: const TextStyle(fontSize: 10)),
+                                    Text(v.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 9)),
+                                    Text('${idx + 1} de ${v.tracks.length}', style: const TextStyle(fontSize: 9)),
                                   ]),
                                 ),
                               ]),
                       ),
                       Row(children: [
-                        Text(_fmt(pos), style: const TextStyle(fontSize: 10)),
-                        const SizedBox(width: 6),
+                        Text(_fmt(pos), style: const TextStyle(fontSize: 9)),
+                        const SizedBox(width: 4),
                         Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(value: prog, minHeight: 7, color: const Color(0xFF2B79C2), backgroundColor: const Color(0x3316222A)),
-                          ),
+                          child: LinearProgressIndicator(value: prog, minHeight: 6, color: ink, backgroundColor: const Color(0x3316222A)),
                         ),
-                        const SizedBox(width: 6),
-                        Text('-${_fmt(dur - pos < Duration.zero ? Duration.zero : dur - pos)}', style: const TextStyle(fontSize: 10)),
+                        const SizedBox(width: 4),
+                        Text('-${_fmt(dur - pos < Duration.zero ? Duration.zero : dur - pos)}', style: const TextStyle(fontSize: 9)),
                       ]),
                     ]),
                   ),
                 ),
               ),
-              const Spacer(),
-              SizedBox(
+              // Rueda funcional sobre la rueda del modelo
+              Positioned(
+                left: wcx - wheel / 2,
+                top: wcy - wheel / 2,
                 width: wheel,
                 height: wheel,
                 child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
                   onTapUp: (d) => _tapWheel(d.localPosition, wheel / 2),
                   onPanStart: (d) => _lastAngle = math.atan2(d.localPosition.dy - wheel / 2, d.localPosition.dx - wheel / 2),
                   onPanUpdate: (d) => _spin(d.localPosition, wheel / 2),
                   child: Stack(alignment: Alignment.center, children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(colors: _dark ? const [Color(0xFF2A2A2F), Color(0xFF0A0A0C)] : const [Color(0xFFFFFFFF), Color(0xFFD6D7DC)]),
-                        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 3))],
-                      ),
-                    ),
-                    Container(
-                      width: wheel * .32,
-                      height: wheel * .32,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: body.reversed.toList()),
-                        border: Border.all(color: Colors.black12),
-                      ),
-                    ),
-                    Positioned(top: wheel * .08, child: Text('MENU', style: TextStyle(color: ink, fontWeight: FontWeight.w800, fontSize: wheel * .06))),
-                    Positioned(right: wheel * .08, child: Icon(Icons.fast_forward, color: ink, size: wheel * .1)),
-                    Positioned(left: wheel * .08, child: Icon(Icons.fast_rewind, color: ink, size: wheel * .1)),
-                    Positioned(bottom: wheel * .07, child: Icon(Icons.play_arrow, color: ink, size: wheel * .1)),
+                    Positioned(top: wheel * .06, child: Text('MENU', style: TextStyle(color: const Color(0xFF6A6B72), fontWeight: FontWeight.w800, fontSize: wheel * .06))),
+                    Positioned(right: wheel * .05, child: Icon(Icons.fast_forward, color: const Color(0xFF6A6B72), size: wheel * .1)),
+                    Positioned(left: wheel * .05, child: Icon(Icons.fast_rewind, color: const Color(0xFF6A6B72), size: wheel * .1)),
+                    Positioned(bottom: wheel * .05, child: Icon(Icons.play_arrow, color: const Color(0xFF6A6B72), size: wheel * .1)),
                   ]),
                 ),
               ),
-              const Spacer(),
             ]),
           );
         }),

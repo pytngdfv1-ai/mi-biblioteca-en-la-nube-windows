@@ -33,6 +33,7 @@ import '../theme.dart';
 import '../widgets/cover_tint.dart';
 import 'back_cover_screen.dart';
 import 'booklet_screen.dart';
+import 'info_screen.dart';
 import 'lyrics_sheet.dart';
 import 'move_dialog.dart';
 
@@ -994,7 +995,16 @@ class DetailSheet extends StatelessWidget {
                       : const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
                 ),
                 Text(v.yearLabel, style: const TextStyle(color: Colors.white60)),
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.tonalIcon(
+                    icon: const Icon(Icons.article_outlined),
+                    label: const Text('Información completa y letras'),
+                    onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => InfoScreen(vinyl: v))),
+                  ),
+                ),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(

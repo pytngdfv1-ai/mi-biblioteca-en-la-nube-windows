@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../data/ui_settings.dart';
 import '../models/vinyl.dart';
+import '../models/vinyl_extras.dart';
 import 'wear_painter.dart';
 import 'cover_art.dart';
 
@@ -46,17 +47,19 @@ class CassetteBody extends StatelessWidget {
         children: [
           CustomPaint(size: Size(cw, ch), painter: _CassettePainter(st)),
           // Etiqueta de color: la portada adaptada cubre la franja (sin tapar la ventana).
-          if (v.coverUrl != null)
+          if (v.coverUrl != null || v.shellUrl != null)
             Positioned.fill(
               child: ClipPath(
                 clipper: _StripClipper(),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    CoverArt(vinyl: v, radius: 0),
-                    const DecoratedBox(
-                      decoration: BoxDecoration(color: Color(0x33000000)),
-                    ),
+                    if (v.shellUrl != null)
+                      buildCoverImage(v.shellUrl!, cacheWidth: 900, fit: BoxFit.cover, fallback: CoverArt(vinyl: v, radius: 0))
+                    else ...[
+                      CoverArt(vinyl: v, radius: 0),
+                      const DecoratedBox(decoration: BoxDecoration(color: Color(0x33000000))),
+                    ],
                   ],
                 ),
               ),

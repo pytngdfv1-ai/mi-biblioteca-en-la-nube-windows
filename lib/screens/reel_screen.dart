@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../platform/haptic.dart';
 import 'package:flutter/scheduler.dart';
+
+import '../data/levels.dart';
 import 'package:flutter/services.dart';
 
 import '../audio/player_service.dart';
@@ -58,7 +60,8 @@ class _ReelScreenState extends State<ReelScreen> with SingleTickerProviderStateM
     _angleR += _speed * dt * 3.2 * (0.7 / (0.47 + 0.45 * prog));
     final s = d.inMilliseconds / 1000.0;
     final target = playing ? 0.5 + 0.25 * math.sin(s * 7.3) * math.sin(s * 2.1) + 0.15 * math.sin(s * 13.0) : 0.0;
-    _vu += (target - _vu) * math.min(1.0, dt * 9);
+    final real = playing && Levels.live ? Levels.level.value : target;
+    _vu += (real - _vu) * math.min(1.0, dt * 9);
     _t.value++;
   }
 

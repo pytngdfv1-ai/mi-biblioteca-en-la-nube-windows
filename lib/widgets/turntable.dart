@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../platform/haptic.dart';
 
+import '../data/track_durations.dart';
 import '../data/ui_settings.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
@@ -329,6 +330,7 @@ class _TurntableState extends State<Turntable> with TickerProviderStateMixin {
                         scale: widget.scale,
                         trackIndex: widget.trackIndex,
                         trackCount: widget.trackCount,
+                        bounds: TrackDurations.bounds(widget.vinyl.id, widget.trackCount),
                         progress: p,
                         arm: Curves.easeInOut.transform(_arm.value),
                       ),
@@ -462,8 +464,10 @@ class _ArmPainter extends CustomPainter {
     required this.scale,
     required this.trackIndex,
     required this.trackCount,
+    required this.bounds,
   });
 
+  final List<double> bounds;
   final double progress;
   final double arm;
   final double scale;
@@ -488,8 +492,9 @@ class _ArmPainter extends CustomPainter {
     final idx = trackCount > bands
         ? (trackIndex * bands ~/ trackCount).clamp(0, bands - 1)
         : trackIndex.clamp(0, bands - 1);
-    final width = (ro - ri) / bands;
-    final radius = ro - (idx + progress.clamp(0.0, 1.0)) * width;
+    final b = bounds.length == bands + 1 ? bounds : [for (var k = 0; k <= bands; k++) k / bands];
+    final frac = b[idx] + (b[idx + 1] - b[idx]) * progress.clamp(0.0, 1.0);
+    final radius = ro - frac * (ro - ri);
     final aPlay = g.angleFor(radius);
     final aRest = g.angleFor(ro) - 0.30; // brazo fuera del disco
     final a = aRest + (aPlay - aRest) * arm;

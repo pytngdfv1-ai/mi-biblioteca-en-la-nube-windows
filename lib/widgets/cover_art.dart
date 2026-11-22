@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../data/koofr_settings.dart';
 import '../data/thumb_cache.dart';
 import '../models/vinyl.dart';
+import '../models/vinyl_extras.dart';
 
 /// Imagen de portada: archivo local (file://) o red (Koofr / internet).
 Widget buildCoverImage(
@@ -111,10 +112,15 @@ class CoverArt extends StatelessWidget {
     final art = _generated();
     final url = vinyl.coverUrl;
     if (url == null) return art;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: buildCoverImage(url, cacheWidth: 700, fallback: art),
-    );
+    return LayoutBuilder(builder: (context, c) {
+      // Miniatura de 300 px hecha por el agente para tamaños chicos (carga al instante).
+      final small = c.maxWidth.isFinite && c.maxWidth <= 200;
+      final u = small ? (vinyl.thumbUrl ?? url) : url;
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: buildCoverImage(u, cacheWidth: small ? 300 : 700, fallback: u == url ? art : buildCoverImage(url, cacheWidth: 700, fallback: art)),
+      );
+    });
   }
 
   Widget _generated() {

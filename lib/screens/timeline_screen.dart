@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/agent_index.dart';
 import '../data/musicbrainz.dart';
+import '../data/timeline_pdf.dart';
 import '../data/vinyl_store.dart';
 import '../models/vinyl.dart';
-import '../widgets/cover_art.dart';
+import '../widgets/lookup_cover.dart';
 import 'library_actions.dart';
 
 /// Línea de tiempo: la biblioteca ordenada por año de lanzamiento, con los años detectados.
@@ -21,6 +23,7 @@ class TimelineScreen extends StatefulWidget {
 class _TimelineScreenState extends State<TimelineScreen> {
   static const _key = 'timeline_years_v1';
   Map<String, int> _found = {};
+  Map<String, int> _index = {};
   bool _newestFirst = false;
   bool _busy = false;
   int _done = 0, _total = 0;
@@ -39,9 +42,12 @@ class _TimelineScreenState extends State<TimelineScreen> {
         setState(() => _found = {for (final e in (jsonDecode(raw) as Map).entries) e.key as String: (e.value as num).toInt()});
       }
     } catch (_) {}
+    // Años ya calculados por el agente (indice.json): línea de tiempo al instante.
+    final idx = await AgentIndex.years();
+    if (mounted && idx.isNotEmpty) setState(() => _index = idx);
   }
 
-  int _year(Vinyl v) => v.year > 0 ? v.year : (_found[v.id] ?? 0);
+  int _year(Vinyl v) => v.year > 0 ? v.year : (_found[v.id] ?? _index[AgentIndex.key(v.artist, v.title)] ?? 0);
 
   List<Vinyl> get _all => [for (final v in widget.store.items) if (!v.isDivider) v];
 
@@ -64,6 +70,38 @@ class _TimelineScreenState extends State<TimelineScreen> {
       final p = await SharedPreferences.getInstance();
       await p.setString(_key, jsonEncode(_found));
     } catch (_) {}
+    if (mounted) setState(() => _busy = false);
+  }
+
+  Future<void> _exportPdf() async {
+    final byYear = <int, List<Vinyl>>{};
+    for (final v in _all) {
+      (byYear[_year(v)] ??= []).add(v);
+    }
+    final years = byYear.keys.where((y) => y > 0).toList()..sort();
+    if (byYear.containsKey(0)) years.add(0);
+    if (years.isEmpty) return;
+    setState(() {
+      _busy = true;
+      _done = 0;
+      _total = _all.length;
+    });
+    try {
+      // Las portadas que faltan se completan con las encontradas en la pantalla.
+      for (final e in byYear.entries) {
+        for (var i = 0; i < e.value.length; i++) {
+          final u = LookupCover.found[e.value[i].id];
+          if (e.value[i].coverUrl == null && u != null) e.value[i] = e.value[i].copyWith(coverUrl: u);
+        }
+      }
+      final bytes = await TimelinePdf.build(byYear, years, onProgress: (d, t) {
+        if (mounted) setState(() => _done = d);
+      });
+      final path = await TimelinePdf.save(bytes);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('PDF guardado: $path')));
+    } catch (_) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo crear el PDF')));
+    }
     if (mounted) setState(() => _busy = false);
   }
 
@@ -99,6 +137,11 @@ class _TimelineScreenState extends State<TimelineScreen> {
             tooltip: _newestFirst ? 'Del más antiguo' : 'Del más reciente',
             icon: Icon(_newestFirst ? Icons.arrow_downward : Icons.arrow_upward),
             onPressed: () => setState(() => _newestFirst = !_newestFirst),
+          ),
+          IconButton(
+            tooltip: 'Exportar a PDF',
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            onPressed: _busy ? null : _exportPdf,
           ),
           IconButton(
             tooltip: 'Detectar años que faltan',
@@ -142,7 +185,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
               separatorBuilder: (_, __) => const SizedBox(width: 8),
               itemBuilder: (_, i) => GestureDetector(
                 onTap: () => openStage(context, widget.store, list[i]),
-                child: SizedBox(width: 96, height: 96, child: CoverArt(vinyl: list[i], radius: 6)),
+                child: SizedBox(width: 96, height: 96, child: LookupCover(vinyl: list[i])),
               ),
             ),
           ),

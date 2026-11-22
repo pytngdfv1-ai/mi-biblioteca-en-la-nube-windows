@@ -12,9 +12,12 @@ import '../data/play_mode.dart';
 import 'reel_screen.dart';
 import 'cloud_explorer_screen.dart';
 import 'stage_screen.dart';
+import 'agent_screen.dart';
+import 'novedades_screen.dart';
 import 'cover_suggest_screen.dart';
 import 'custom_discs_screen.dart';
 import 'ipod_screen.dart';
+import 'cloud_space_screen.dart';
 import 'objects3d_screen.dart';
 
 /// Abre la pantalla del disco (tocadisco, deck o cinta abierta, según el reproductor elegido).
@@ -112,6 +115,30 @@ Future<void> showLibrarySettings(BuildContext context, {VinylStore? store}) asyn
               title: const Text('Objetos 3D'),
               subtitle: const Text('Elige discos y cassettes: trasera y etiqueta', style: TextStyle(fontSize: 12)),
               onTap: () => Navigator.of(ctx).push(MaterialPageRoute<void>(builder: (_) => Objects3DScreen(store: store!))),
+            ),
+            ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.new_releases_outlined),
+              title: const Text('Novedades'),
+              subtitle: const Text('Todas las actualizaciones, desde el principio', style: TextStyle(fontSize: 12)),
+              onTap: () => Navigator.of(ctx).push(MaterialPageRoute<void>(builder: (_) => const NovedadesScreen())),
+            ),
+            ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.cloud_queue),
+              title: const Text('Espacio en las nubes'),
+              subtitle: const Text('Total y usado de cada nube', style: TextStyle(fontSize: 12)),
+              onTap: () => Navigator.of(ctx).push(MaterialPageRoute<void>(builder: (_) => const CloudSpaceScreen())),
+            ),
+            ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.smart_toy_outlined),
+              title: const Text('Agente'),
+              subtitle: const Text('Resumen diario, pendientes, duplicados, historial y ejecutar', style: TextStyle(fontSize: 12)),
+              onTap: () => Navigator.of(ctx).push(MaterialPageRoute<void>(builder: (_) => AgentScreen(store: store))),
             ),
             ListTile(
               dense: true,
