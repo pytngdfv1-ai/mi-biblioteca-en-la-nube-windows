@@ -86,7 +86,7 @@ class TimelinePdf {
       pageFormat: PdfPageFormat.a4,
       margin: const pw.EdgeInsets.all(28),
       header: (c) => c.pageNumber == 1
-          ? pw.Text('Mi Biblioteca – Línea de tiempo', style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold))
+          ? pw.Text('Mi Biblioteca en la nube – Línea de tiempo', style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold))
           : pw.SizedBox(),
       footer: (c) => pw.Align(alignment: pw.Alignment.centerRight, child: pw.Text('${c.pageNumber}/${c.pagesCount}', style: const pw.TextStyle(fontSize: 8))),
       build: (_) => blocks,

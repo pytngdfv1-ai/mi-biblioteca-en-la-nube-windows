@@ -75,7 +75,7 @@ class BackupService {
       f = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
       if (f['format'] != 'vinylbackup') throw const FormatException();
     } catch (_) {
-      throw const BackupException('El archivo no es una copia de Mi Biblioteca');
+      throw const BackupException('El archivo no es una copia de Mi Biblioteca en la nube');
     }
     List<int> plain;
     try {
