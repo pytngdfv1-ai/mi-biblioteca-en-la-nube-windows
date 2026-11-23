@@ -13,11 +13,11 @@
 
 [Setup]
 AppId={{5D08DC42-C050-4E8F-BBF3-1A0CEDBE9E82}
-AppName=Mi Biblioteca
+AppName=Mi Biblioteca en la nube
 AppVersion={#AppVersion}
 AppPublisher=pytngdfv1-ai
 DefaultDirName={autopf}\VinylSolutions
-DefaultGroupName=Mi Biblioteca
+DefaultGroupName=Mi Biblioteca en la nube
 DisableProgramGroupPage=yes
 OutputDir={#OutputDir}
 OutputBaseFilename=VinylSolutions-Setup
@@ -43,10 +43,10 @@ Name: "desktopicon"; Description: "Crear un acceso directo en el escritorio"; Gr
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
 
 [Icons]
-Name: "{autoprograms}\Mi Biblioteca"; Filename: "{app}\{#AppExe}"
-Name: "{autodesktop}\Mi Biblioteca"; Filename: "{app}\{#AppExe}"; Tasks: desktopicon
+Name: "{autoprograms}\Mi Biblioteca en la nube"; Filename: "{app}\{#AppExe}"
+Name: "{autodesktop}\Mi Biblioteca en la nube"; Filename: "{app}\{#AppExe}"; Tasks: desktopicon
 
 [Run]
 ; Instalación normal: ofrece abrir la app. Actualización silenciosa: la reabre sola.
-Filename: "{app}\{#AppExe}"; Description: "Abrir Mi Biblioteca"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#AppExe}"; Description: "Abrir Mi Biblioteca en la nube"; Flags: nowait postinstall skipifsilent
 Filename: "{app}\{#AppExe}"; Flags: nowait; Check: WizardSilent

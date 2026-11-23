@@ -215,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: AppColors.ink,
           appBar: AppBar(
             backgroundColor: AppColors.ink,
-            title: const Text('Mi Biblioteca'),
+            title: const Text('Mi Biblioteca en la nube'),
             actions: [
               IconButton(
                 tooltip: 'Hojear',

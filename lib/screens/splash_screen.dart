@@ -125,7 +125,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     Opacity(
                       opacity: name,
                       child: Column(children: [
-                        const Text('Mi Biblioteca',
+                        const Text('Mi Biblioteca en la nube',
                             style: TextStyle(color: Color(0xFFEBDDBF), fontSize: 26, fontWeight: FontWeight.w300, letterSpacing: 2)),
                         const SizedBox(height: 14),
                         SizedBox(

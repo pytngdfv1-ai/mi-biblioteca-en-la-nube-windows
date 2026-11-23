@@ -25,9 +25,9 @@ class ManualSection {
 
 const manualSections = <ManualSection>[
   ManualSection("inicio", "Primeros pasos", "Agrega tu música en tres minutos", "arrow_forward", [
-    ManualBlock("p", text: "Mi Biblioteca lee tus archivos de audio y arma la colección sola. Puedes usar una nube, una carpeta del equipo o las dos."),
+    ManualBlock("p", text: "Mi Biblioteca en la nube lee tus archivos de audio y arma la colección sola. Puedes usar una nube, una carpeta del equipo o las dos."),
     ManualBlock("ol", items: ["Toca [[+]] arriba a la derecha.", "Elige **Conectar nube** e ingresa tu correo de Koofr y una contraseña de aplicación. O elige **Carpeta del equipo**.", "Indica la carpeta de música y espera el escaneo. La barra fina de arriba muestra el avance.", "Los discos aparecen ordenados en cajones. Toca uno y escucha."]),
-    ManualBlock('tip', title: "Contraseña de aplicación.", text: "Créala en los ajustes de Koofr. Mi Biblioteca la guarda cifrada en tu dispositivo y nunca la envía a terceros."),
+    ManualBlock('tip', title: "Contraseña de aplicación.", text: "Créala en los ajustes de Koofr. Mi Biblioteca en la nube la guarda cifrada en tu dispositivo y nunca la envía a terceros."),
     ManualBlock("h", text: "Varias cuentas"),
     ManualBlock("p", text: "Puedes conectar más de una cuenta. Cada una se muestra como una biblioteca con el nombre que le pongas. La palabra \"Koofr\" no aparece: se muestra como **Nube**."),
   ]),

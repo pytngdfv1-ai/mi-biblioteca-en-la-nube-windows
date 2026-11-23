@@ -10,7 +10,7 @@ import 'agent_index.dart';
 class UpdateNotice {
   static const current = String.fromEnvironment('APP_VERSION', defaultValue: '');
   static bool _checked = false;
-  static const defaultUrl = 'https://github.com/pytngdfv1-ai/vinyl-solutions-windows/releases/latest';
+  static const defaultUrl = 'https://github.com/pytngdfv1-ai/mi-biblioteca-en-la-nube-windows/releases/latest';
 
   /// Abre la página de descarga en el navegador (si no puede, copia el enlace).
   static Future<void> open(BuildContext context, [String? url]) async {

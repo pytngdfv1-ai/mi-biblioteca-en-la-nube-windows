@@ -97,7 +97,7 @@ class _AboutScreenState extends State<AboutScreen> {
                   const Center(
                     child: Column(
                       children: [
-                        Text('Mi Biblioteca', style: TextStyle(fontWeight: FontWeight.w600)),
+                        Text('Mi Biblioteca en la nube', style: TextStyle(fontWeight: FontWeight.w600)),
                         Text('Hecha para escuchar con calma.', style: TextStyle(color: _muted, fontSize: 13)),
                       ],
                     ),
@@ -125,7 +125,7 @@ class _AboutScreenState extends State<AboutScreen> {
       children: [
         const SizedBox(width: 64, height: 64, child: CustomPaint(painter: _DiscPainter())),
         const SizedBox(height: 14),
-        const Text('Mi Biblioteca', style: TextStyle(fontFamily: titleFont, fontSize: 36, height: 1.05)),
+        const Text('Mi Biblioteca en la nube', style: TextStyle(fontFamily: titleFont, fontSize: 36, height: 1.05)),
         const SizedBox(height: 6),
         const Text('Tu música en discos, cassettes y mesas de DJ. Todo vive en tu dispositivo.',
             style: TextStyle(color: _muted)),

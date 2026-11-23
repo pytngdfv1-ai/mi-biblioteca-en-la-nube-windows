@@ -1,4 +1,4 @@
-# Mi Biblioteca · Manual de uso
+# Mi Biblioteca en la nube · Manual de uso
 
 > Tu música en discos, cassettes y mesas de DJ. Todo vive en tu dispositivo.
 
@@ -8,14 +8,14 @@ Este manual también está dentro de la app, en **Acerca de** (menú **+**).
 
 *Agrega tu música en tres minutos*
 
-Mi Biblioteca lee tus archivos de audio y arma la colección sola. Puedes usar una nube, una carpeta del teléfono o las dos.
+Mi Biblioteca en la nube lee tus archivos de audio y arma la colección sola. Puedes usar una nube, una carpeta del teléfono o las dos.
 
 1. Toca `+` arriba a la derecha.
 2. Elige **Conectar nube** e ingresa tu correo de Koofr y una contraseña de aplicación. O elige **Carpeta del teléfono**.
 3. Indica la carpeta de música y espera el escaneo. La barra fina de arriba muestra el avance.
 4. Los discos aparecen ordenados en cajones. Toca uno y escucha.
 
-> **Contraseña de aplicación.** Créala en los ajustes de Koofr. Mi Biblioteca la guarda cifrada en tu dispositivo y nunca la envía a terceros.
+> **Contraseña de aplicación.** Créala en los ajustes de Koofr. Mi Biblioteca en la nube la guarda cifrada en tu dispositivo y nunca la envía a terceros.
 
 ### Varias cuentas
 

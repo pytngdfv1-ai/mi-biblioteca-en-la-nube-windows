@@ -1,4 +1,4 @@
-# Mi Biblioteca para Windows (antes VinylSolutions)
+# Mi Biblioteca en la nube para Windows (antes VinylSolutions)
 
 Biblioteca virtual de discos y cassettes (menú 360°, tocadisco, cassettes, Cover Studio, playlists, DJ en vivo, Koofr y carpeta local). Mismo código `lib/` que la app de Android (versión 1.27).
 
@@ -44,7 +44,7 @@ Las actualizaciones se firman con una clave DSA (WinSparkle). La **privada** va 
    openssl gendsa -out dsa_priv.pem dsaparam.pem
    openssl dsa -in dsa_priv.pem -pubout -out dsa_pub.pem
    ```
-3. Sube **solo** `dsa_pub.pem` a la raíz del repo (`pytngdfv1-ai/vinyl-solutions-windows`).
+3. Sube **solo** `dsa_pub.pem` a la raíz del repo (`pytngdfv1-ai/mi-biblioteca-en-la-nube-windows`).
 4. En GitHub: **Settings → Secrets and variables → Actions → New repository secret**. Nombre: `DSA_PRIV_PEM`. Valor: todo el contenido de `dsa_priv.pem`.
 5. **Guarda `dsa_priv.pem` en un lugar seguro y bórralo de la carpeta de trabajo.** Si lo pierdes, las apps ya instaladas no podrán recibir actualizaciones.
 

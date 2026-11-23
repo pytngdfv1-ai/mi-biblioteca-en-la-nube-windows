@@ -165,7 +165,7 @@ jobs:
           <?xml version="1.0" encoding="UTF-8"?>
           <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
             <channel>
-              <title>Mi Biblioteca</title>
+              <title>Mi Biblioteca en la nube</title>
               <item>
                 <title>Versión ${VER}</title>
                 <pubDate>$(date -u +"%a, %d %b %Y %H:%M:%S +0000")</pubDate>
@@ -243,5 +243,5 @@ jobs:
             test -s "$f" || { echo "::error title=Falta archivo::$f"; exit 1; }
           done
           gh release create "$TAG" dist/VinylSolutions-Setup.exe dist/VinylSolutions-portable.zip dist/appcast.xml \
-            --title "Mi Biblioteca $VER" \
+            --title "Mi Biblioteca en la nube $VER" \
             --notes "Instalador (VinylSolutions-Setup.exe) y versión portable (ZIP). La app instalada se actualiza sola."

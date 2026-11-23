@@ -38,7 +38,7 @@ Future<void> main() async {
       size: Size(1180, 800),
       minimumSize: Size(560, 640),
       center: true,
-      title: 'Mi Biblioteca',
+      title: 'Mi Biblioteca en la nube',
       backgroundColor: Color(0xFF0E0E0D),
     ),
     () async {
@@ -87,7 +87,7 @@ class VinylApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Mi Biblioteca',
+      title: 'Mi Biblioteca en la nube',
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
       scrollBehavior: const DesktopScrollBehavior(),

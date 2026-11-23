@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 
 /// Dirección del appcast (asset del último release de GitHub).
 const String kAppcastUrl =
-    'https://github.com/pytngdfv1-ai/vinyl-solutions-windows/releases/latest/download/appcast.xml';
+    'https://github.com/pytngdfv1-ai/mi-biblioteca-en-la-nube-windows/releases/latest/download/appcast.xml';
 
 /// Busca actualizaciones al abrir y cada 6 horas (WinSparkle pregunta si instalar).
 Future<void> initUpdater() async {
