@@ -1,5 +1,177 @@
 [
  {
+  "v": "1.95",
+  "titulo": "Se quita el botón del agente 3D",
+  "agrega": [],
+  "quita": [
+   "Botón «Ejecutar agente 3D ahora» (el agente 3D sigue corriendo solo 4 veces al día)"
+  ]
+ },
+ {
+  "v": "1.94",
+  "titulo": "Avisos al ejecutar el agente",
+  "agrega": [
+   "Si falta el token, los botones «Ejecutar» ahora lo avisan en vez de no hacer nada"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.93",
+  "titulo": "Agente 3D desde la app",
+  "agrega": [
+   "Botón «Ejecutar agente 3D ahora» en Agente → Ejecutar (discografías, duplicados); usa el mismo token, con permiso también en mi-biblioteca-3d"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.92",
+  "titulo": "Se quita la Línea de tiempo",
+  "agrega": [
+   "El agente completa año, sello y géneros de discos que ya tenían ficha"
+  ],
+  "quita": [
+   "Línea de tiempo (icono de reloj y su PDF)"
+  ]
+ },
+ {
+  "v": "1.91",
+  "titulo": "Subida automática, pausa y cola de subida",
+  "agrega": [
+   "«Subir todo ahora» en Ajustes → Subida desde el equipo, con «Pausar subida» y cola de subida (pendientes, subidos y errores, con «Reintentar»)",
+   "Si se corta la red, reintenta con espera creciente; sube primero los temas sueltos pequeños y después los discos grandes",
+   "La subida automática en segundo plano y la guía de ahorro de energía son solo de Android"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.90",
+  "titulo": "Agente: completa más datos de tus discos",
+  "agrega": [
+   "El agente completa año, sello y géneros con más fuentes (Wikipedia, TheAudioDB, MusicBrainz, iTunes y Deezer) y solo escribe cuando dos coinciden; lo dudoso queda en _agente/dudosos.md",
+   "Reintenta cada semana (antes se rendía tras 4 intentos) y vuelve a revisar los discos que ya estaban «listos»",
+   "Deduce el artista de los discos que están en Inglés/Español sin carpeta de artista, y las carpetas de temas sueltos ya no salen en «Por completar»"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.89",
+  "titulo": "Temas sueltos: el agente de la nube les arma el álbum",
+  "agrega": [
+   "«Subir lo nuevo» deja cada tema suelto directo en Idioma/Artista/ (sin carpeta propia), donde el agente de la nube lo detecta, le busca el álbum y lo copia a Artista/Álbum/"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.88",
+  "titulo": "Subir lo nuevo del equipo a la nube",
+  "agrega": [
+   "Carpeta local: «Subir lo nuevo a la nube» sube a tu nube lo que aún no está, como Artista/Disco/Tema, y quita «Artista - » del nombre del archivo",
+   "«Ver qué subiría» muestra la lista antes de tocar nada; no pisa archivos de la nube y verifica el tamaño de cada copia",
+   "Opciones: revisar al abrir la app y borrar del equipo tras subir (apagado por defecto)"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.87",
+  "titulo": "Discografías: lista de temas que te faltan para Spotify",
+  "agrega": [
+   "Marca los temas que te faltan (casilla en cada tema, «Marcar lo que falta de este álbum» o «Marcar todo lo que me falta» en el menú de la barra)",
+   "Barra inferior: Copiar la lista («Artista – Tema»), guardarla como .txt en Descargas o abrir el importador (TuneMyMusic) para crear la lista en Spotify",
+   "Lupa en cada tema que falta: lo busca en Spotify"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.86",
+  "titulo": "Discografías: lo que tienes, tema por tema",
+  "agrega": [
+   "Discografías compara cada tema con tu biblioteca (álbumes y temas sueltos): ✓ verde en los temas que tienes",
+   "Álbum parcial: punto amarillo con ✓ y «tienes N de M temas»; completo: ✓ verde; sin temas: ✗",
+   "El contador de cada artista ahora cuenta temas, no discos, y «Solo lo que me falta» incluye los discos parciales"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.85",
+  "titulo": "Nuevos iconos 3D de Bibliotecas",
+  "agrega": [
+   "Bibliotecas: el icono ahora es un ascensor tapizado de portadas que se balancea suavemente (paralaje)",
+   "Dentro de Bibliotecas, Discos usa una pila de vinilos con el icono de la app como portada",
+   "Discografías usa el icono que tenía Bibliotecas (el cajón de discos)"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.84",
+  "titulo": "Discografías de cada artista",
+  "agrega": [
+   "Nuevo sector Discografías en el menú: lista desplegable por artista con todos sus álbumes (✓ tienes, ✗ te falta) y sus temas",
+   "Buscador inteligente: por artista, álbum, tema o año; sin tildes y tolera errores de tipeo",
+   "El agente 3D va generando las discografías poco a poco y suma los artistas nuevos solo"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.83",
+  "titulo": "Temas sueltos sin contraportada",
+  "agrega": [
+   "Los temas sueltos ya no piden contraportada en las tareas del agente"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.82",
+  "titulo": "Icono del ecualizador más pequeño",
+  "agrega": [
+   "El icono del ecualizador en el menú se ve a la mitad de tamaño"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.81",
+  "titulo": "Icono de Cassettes como antes",
+  "agrega": [
+   "Vuelve el icono 3D negro del cassette en Bibliotecas"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.80",
+  "titulo": "Walkman: ventana del cassette como la real",
+  "agrega": [
+   "La ventana del Walkman muestra el cassette de lado, ocupando todo el hueco: etiqueta con el título, franjas rojas y carretes que giran; los colores de la etiqueta salen de cada portada"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.79",
+  "titulo": "El agente busca más datos; APK con versión en el nombre",
+  "agrega": [
+   "El agente completa año, sello y géneros pendientes con Wikipedia, TheAudioDB y más fuentes gratis (solo rellena lo vacío)",
+   "El agente también busca contraportadas faltantes en Coveralia",
+   "El archivo del APK ahora incluye la versión en el nombre (MiBiblioteca-1.79.apk)"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.78",
+  "titulo": "Walkman con el cassette que suena",
+  "agrega": [
+   "Walkman: la ventana muestra la parte central del cassette que se está reproduciendo (etiqueta, portada y carretes girando)"
+  ],
+  "quita": []
+ },
+ {
+  "v": "1.77",
+  "titulo": "Walkman y cassette en 3D",
+  "agrega": [
+   "Nuevo reproductor Walkman (Sony TPS-L2, modelo 3D de Avonsaku, CC BY 4.0): carretes que giran, rebobinar y avanzar manteniendo la tecla, y pilas que se gastan al escuchar (toca el indicador para cambiarlas)",
+   "Icono 3D del Walkman en Reproductores",
+   "Icono 3D de cassette (modelo de joshtmc, CC BY-SA 4.0) en Bibliotecas → Cassettes"
+  ],
+  "quita": []
+ },
+ {
   "v": "1.76",
   "titulo": "Aviso de versión al instante",
   "agrega": [

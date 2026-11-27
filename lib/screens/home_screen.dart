@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../audio/player_service.dart';
 import '../data/cajon.dart';
-import 'timeline_screen.dart';
 import '../data/objects3d_queue.dart';
 import '../data/library_sync.dart';
 import '../data/tilt.dart';
+import '../data/local_sync.dart';
 import '../data/vinyl_store.dart';
 import 'cover_studio_screen.dart';
 import 'cover_suggest_screen.dart';
+import 'discografias_screen.dart';
 import 'equalizer_screen.dart';
 import '../data/update_notice.dart';
 import 'menu_ring_screen.dart';
@@ -61,6 +62,9 @@ class _HomeScreenState extends State<HomeScreen> {
       _announceNew();
       GuideScreen.showFirstTime(context);
       UpdateNotice.check(context);
+      LocalSync.auto(widget.store).then((msg) {
+        if (msg != null && mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      });
     });
   }
 
@@ -125,6 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ('Ajustes', 'Opciones de la app', MenuIconKind.gear),
     ('Buscador de portadas', 'Cover Studio', MenuIconKind.covers),
     ('Buscador de temas y álbumes', 'Busca en tu biblioteca', MenuIconKind.search),
+    ('Discografías', 'Todo lo de cada artista', MenuIconKind.covers),
     ('Ecualizador', 'Graves, medios y agudos', MenuIconKind.equalizer),
   ];
 
@@ -138,10 +143,12 @@ class _HomeScreenState extends State<HomeScreen> {
             () => _push(ModeScreen(store: widget.store, mode: PlayMode.reel))),
         MenuRingItem('iPod', 'Rueda y pantalla', MenuIconKind.ipod, 'ipod',
             () => _push(ModeScreen(store: widget.store, mode: PlayMode.ipod))),
+        MenuRingItem('Walkman', 'Cassette portátil con pilas', MenuIconKind.deck, 'walkman',
+            () => _push(ModeScreen(store: widget.store, mode: PlayMode.walkman))),
       ]));
 
   void _libraries() => _push(MenuRingScreen(title: 'Bibliotecas', items: [
-        MenuRingItem('Discos', 'Álbumes, inglés, español y sueltos', MenuIconKind.turntable, 'disc',
+        MenuRingItem('Discos', 'Álbumes, inglés, español y sueltos', MenuIconKind.turntable, 'vinilos',
             () => _push(ModeScreen(store: widget.store, mode: PlayMode.disc, titleOverride: 'Bibliotecas · discos'))),
         MenuRingItem('Cassettes', 'Álbumes, inglés, español y sueltos', MenuIconKind.deck, 'k7',
             () => _push(ModeScreen(store: widget.store, mode: PlayMode.cassette, titleOverride: 'Bibliotecas · cassettes'))),
@@ -159,12 +166,14 @@ class _HomeScreenState extends State<HomeScreen> {
         _push(CoverStudioScreen(store: widget.store));
       case 4:
         _push(SearchScreen(store: widget.store));
+      case 5:
+        _push(DiscografiasScreen(store: widget.store));
       default:
         _push(const EqualizerScreen());
     }
   }
 
-  static const _models3d = <String?>['players', 'crate', 'gear', 'covers_search', 'lupa', null];
+  static const _models3d = <String?>['players', 'elevator', 'gear', 'covers_search', 'lupa', 'crate'];
 
   Widget _ring(List<Cajon> cajones, List<Vinyl> all) {
     const items = _menuItems;
@@ -258,11 +267,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icon(ring ? Icons.grid_view : Icons.threed_rotation),
                   onPressed: () => UiSettings.setHome(!ring),
                 ),
-              ),
-              IconButton(
-                tooltip: 'Línea de tiempo',
-                icon: const Icon(Icons.timeline),
-                onPressed: () => _push(TimelineScreen(store: widget.store)),
               ),
               IconButton(
                 tooltip: 'Buscar',

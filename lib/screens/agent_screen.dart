@@ -400,6 +400,13 @@ class _AgentScreenState extends State<AgentScreen> {
       }[k] ??
       k;
 
+  /// Carpeta de artista con temas sueltos (Idioma/Artista): no necesita contraportada.
+  bool _esSuelto(String p) {
+    final parts = p.split('/').where((s) => s.isNotEmpty).toList();
+    final i = parts.indexWhere((s) => const {'ingles', 'inglés', 'español', 'espanol', 'english', 'spanish'}.contains(s.toLowerCase()));
+    return i >= 0 && parts.length - i == 2;
+  }
+
   // ---- Tareas manuales ----
   Widget _tareas() {
     final albums = (_estado['albums'] as Map?)?.cast<String, dynamic>() ?? {};
@@ -409,7 +416,7 @@ class _AgentScreenState extends State<AgentScreen> {
       final t = name.length >= 2 ? '${name[name.length - 2]} – ${name.last}' : name.isEmpty ? p : name.last;
       if (v['cover'] == false) tasks.add((3, t, 'Falta la portada'));
       if (v['meta'] == false) tasks.add((2, t, 'Faltan datos (año, género, pistas)'));
-      if (v['back'] == false && v['cover'] == true) tasks.add((1, t, 'Falta la contraportada'));
+      if (v['back'] == false && v['cover'] == true && !_esSuelto(p)) tasks.add((1, t, 'Falta la contraportada'));
     });
     final pend = (_estado['pendientes'] as Map?)?.length ?? 0;
     if (tasks.isEmpty && pend == 0) return _msg('No hay tareas. ¡Todo en orden!');
@@ -447,7 +454,10 @@ class _AgentScreenState extends State<AgentScreen> {
   Future<void> _run() async {
     final t = _tokenCtl.text.trim();
     final repo = _repoCtl.text.trim();
-    if (t.isEmpty || repo.isEmpty) return;
+    if (t.isEmpty || repo.isEmpty) {
+      setState(() => _runMsg = 'Falta el token de GitHub o el repositorio.');
+      return;
+    }
     setState(() => _runMsg = 'Enviando…');
     try {
       await _store.write(key: 'agent_gh_token', value: t);

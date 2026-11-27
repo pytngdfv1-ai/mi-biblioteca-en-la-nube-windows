@@ -17,9 +17,11 @@ import 'novedades_screen.dart';
 import 'cover_suggest_screen.dart';
 import 'custom_discs_screen.dart';
 import 'ipod_screen.dart';
+import 'walkman_screen.dart';
 import 'cloud_space_screen.dart';
 import '../data/objetos3d_flag.dart';
 import 'agent_objects_screen.dart';
+import 'upload_settings_screen.dart';
 
 /// Abre la pantalla del disco (tocadisco, deck o cinta abierta, según el reproductor elegido).
 Future<void> openStage(BuildContext context, VinylStore store, Vinyl v) {
@@ -30,6 +32,9 @@ Future<void> openStage(BuildContext context, VinylStore store, Vinyl v) {
   }
   if (ViewMode.current == PlayMode.reel) {
     return Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ReelScreen(vinyl: v)));
+  }
+  if (ViewMode.current == PlayMode.walkman) {
+    return Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => WalkmanScreen(vinyl: v)));
   }
   if (ViewMode.current == PlayMode.ipod) {
     return Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => IpodScreen(vinyl: v)));
@@ -100,6 +105,14 @@ Future<void> showLibrarySettings(BuildContext context, {VinylStore? store}) asyn
               title: const Text('Portadas sugeridas'),
               subtitle: const Text('Guarda en la carpeta la portada incrustrada o encontrada', style: TextStyle(fontSize: 12)),
               onTap: () => Navigator.of(ctx).push(MaterialPageRoute<void>(builder: (_) => CoverSuggestScreen(store: store!))),
+            ),
+            ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.cloud_upload),
+              title: const Text('Subida desde el equipo'),
+              subtitle: const Text('Pausa, cola y reintentos', style: TextStyle(fontSize: 12)),
+              onTap: () => Navigator.of(ctx).push(MaterialPageRoute<void>(builder: (_) => UploadSettingsScreen(store: store!))),
             ),
             ListTile(
               dense: true,

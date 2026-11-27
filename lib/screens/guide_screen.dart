@@ -57,7 +57,6 @@ const _pages = <_Page>[
       'Pide permiso de micrófono solo para medir el nivel interno del reproductor (no graba).', icon: Icons.graphic_eq),
   _Page('iPod', 'Rueda: gira para el volumen, toca los bordes para anterior/siguiente y el centro para play/pausa.',
       model: 'ipod'),
-  _Page('Línea de tiempo', 'El icono de reloj arriba ordena tu biblioteca por años de lanzamiento.', icon: Icons.timeline),
   _Page('Agente en la nube', 'Cada día completa metadatos, descarga portadas y contraportadas, y ordena por artista '
       '(copia, sin borrar). Revisa los avisos en la carpeta _agente: informe, pendientes y duplicados.',
       icon: Icons.cloud_sync_outlined),

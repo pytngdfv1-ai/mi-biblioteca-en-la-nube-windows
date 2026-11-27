@@ -49,7 +49,12 @@ flutter:
     - assets/models3d/players/
     - assets/models3d/covers_search/
     - assets/models3d/disc/
+    - assets/models3d/elevator/
+    - assets/models3d/vinilos/
     - assets/models3d/k7/
+    - assets/models3d/walkman/
+    - assets/models3d/walkman_front.webp
+    - assets/models3d/cassette_tape/
   shaders:
     - shaders/vinyl_sheen.frag
   fonts:

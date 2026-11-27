@@ -24,7 +24,7 @@ class MenuIconCard extends StatelessWidget {
       children: [
         Expanded(
           child: model != null
-              ? SpinModel(folder: model!, enabled: front)
+              ? SpinModel(folder: model!, enabled: front, sway: model == 'elevator' || model == 'vinilos', frames: (model == 'elevator' || model == 'vinilos') ? 24 : 36)
               : CustomPaint(painter: _IconPainter(kind), size: Size.infinite),
         ),
         const SizedBox(height: 6),
@@ -68,6 +68,10 @@ class _IconPainter extends CustomPainter {
       case MenuIconKind.reel:
         _reel(c);
       case MenuIconKind.equalizer:
+        // Mitad de tamaño, centrado en el halo.
+        c.translate(50, 54);
+        c.scale(.5);
+        c.translate(-50, -54);
         _eq(c);
       case MenuIconKind.gear:
         _gear(c);

@@ -41,6 +41,7 @@ class _ModeScreenState extends State<ModeScreen> {
         PlayMode.cassette => 'Deck de cassettes',
         PlayMode.reel => 'Cinta abierta',
         PlayMode.ipod => 'iPod',
+        PlayMode.walkman => 'Walkman',
       };
 
   void _open(Cajon c) {

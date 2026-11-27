@@ -74,7 +74,7 @@ class _AboutScreenState extends State<AboutScreen> {
                     'Audio Cassette Tape With Box Kitedit, por kaleidagon (CC-BY 4.0), sketchfab.com/kaleidagon; '
                     'DJ Mixer Lowpoly, por gusnk (CC-BY 4.0); '
                     'Cassette Player, por Console Art Cybernetic (licencia Free Standard de Sketchfab, sin redistribución); '
-                    'Cassette audio (k7), por Amigos3D (CC-BY 4.0); Cassette Case, por Geug (CC-BY 4.0); Vinyl Record, por Cryotizer (CC-BY 4.0); iPod (Scroll Wheel), por Antonio Gomez (CC-BY-NC 4.0, solo uso personal no comercial); engranaje, por Alch (CC-BY 4.0); Lupa, por Maiaraujo (CC-BY 4.0).',
+                    'Cassette audio (k7), por Amigos3D (CC-BY 4.0); Cassette Case, por Geug (CC-BY 4.0); Vinyl Record, por Cryotizer (CC-BY 4.0); iPod (Scroll Wheel), por Antonio Gomez (CC-BY-NC 4.0, solo uso personal no comercial); engranaje, por Alch (CC-BY 4.0); Lupa, por Maiaraujo (CC-BY 4.0); Sony TPS-L2 Walkman, por Avonsaku (CC-BY 4.0); Cassette Tape, por joshtmc (CC-BY-SA 4.0); VINYLS 3, por mfb64 (CC-BY 4.0), sketchfab.com/mfb64; The Groovy Musical Album Art Elevator, por Austin Beaulier (licencia Sketchfab Standard, uso personal), sketchfab.com/Austin.Beaulier.',
                     style: TextStyle(color: _muted, fontSize: 11),
                   ),
                   const SizedBox(height: 18),
