@@ -3,6 +3,7 @@ import 'data/objetos3d_flag.dart';
 import 'data/objects3d_queue.dart';
 import 'data/auto_backup.dart';
 import 'screens/splash_screen.dart';
+import 'data/local_sync.dart';
 import 'data/equalizer.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';

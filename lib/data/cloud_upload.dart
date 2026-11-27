@@ -25,8 +25,12 @@ class CloudUpload {
   static File _file(String url) => File(Uri.parse(url).toFilePath());
 
   /// Carpeta de la nube donde quedará: [dest]/Artista/Álbum (o Artista/Álbum sin [dest]).
-  static List<String> targetDir(Vinyl v, String? dest) {
+  ///
+  /// Con [flatSingles] un tema suelto va directo a [dest]/Artista (sin carpeta propia):
+  /// así lo encuentra el agente de la nube, que le busca el álbum y lo copia a Artista/Álbum.
+  static List<String> targetDir(Vinyl v, String? dest, {bool flatSingles = false}) {
     final artist = KoofrClient.cleanName(v.artist.isEmpty ? 'Artista desconocido' : v.artist);
+    if (flatSingles && v.single) return [if (dest != null && dest.isNotEmpty) dest, artist];
     final album = v.single
         ? KoofrClient.cleanName(v.title)
         : KoofrClient.cleanName(_name(_file(v.trackUrls.first).parent.path));
@@ -46,11 +50,22 @@ class CloudUpload {
     return 'application/octet-stream';
   }
 
+  /// Quita «Artista - » del principio del nombre del archivo (conserva el número de pista).
+  static String stripArtist(String name, String artist) {
+    if (artist.trim().isEmpty) return name;
+    final re = RegExp('^((?:\\d{1,3}\\s*[-._)]*\\s*)?)${RegExp.escape(artist.trim())}\\s*[-–—]\\s*', caseSensitive: false);
+    final out = name.replaceFirstMapped(re, (m) => m.group(1) ?? '');
+    final dot = out.lastIndexOf('.');
+    final base = dot < 0 ? out : out.substring(0, dot);
+    return base.trim().isEmpty ? name : out;
+  }
+
   /// Archivos a subir con su ruta relativa dentro de la carpeta del disco.
-  static Future<List<(File, List<String>)>> _plan(Vinyl v) async {
+  static Future<List<(File, List<String>)>> _plan(Vinyl v, {bool clean = false}) async {
+    String nm(String n) => clean ? stripArtist(n, v.artist) : n;
     if (v.single) {
       return [
-        for (final u in v.trackUrls) (_file(u), [_name(_file(u).path)]),
+        for (final u in v.trackUrls) (_file(u), [nm(_name(_file(u).path))]),
       ];
     }
     final dir = _file(v.trackUrls.first).parent;
@@ -59,6 +74,7 @@ class CloudUpload {
       if (e is! File) continue;
       final rel = e.path.substring(dir.path.length).split(RegExp(r'[\\/]')).where((s) => s.isNotEmpty).toList();
       if (rel.isEmpty || rel.last.startsWith('.')) continue;
+      if (clean) rel[rel.length - 1] = nm(rel.last);
       out.add((e, rel));
     }
     out.sort((a, b) => a.$2.join('/').compareTo(b.$2.join('/')));
@@ -69,12 +85,14 @@ class CloudUpload {
     Vinyl v,
     KoofrSettings acct, {
     String? dest,
+    bool cleanNames = false,
+    bool flatSingles = false,
     void Function(String msg, double progress)? onProgress,
   }) async {
     if (!isLocal(v)) throw const KoofrException('Este disco no está en el equipo');
     final client = KoofrClient(acct);
-    final base = targetDir(v, dest);
-    final files = await _plan(v);
+    final base = targetDir(v, dest, flatSingles: flatSingles);
+    final files = await _plan(v, clean: cleanNames);
     if (files.isEmpty) throw const KoofrException('No hay archivos para subir');
     var total = 0;
     for (final f in files) {

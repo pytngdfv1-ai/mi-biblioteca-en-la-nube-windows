@@ -136,13 +136,13 @@ jobs:
           # Git Bash convierte los argumentos que empiezan con "/" en rutas; se desactiva.
           export MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL="*"
           "$ISCC" "/DAppVersion=$VER" "/DSourceDir=$(cygpath -w "$PWD/build/windows/x64/runner/Release")" "/DOutputDir=$(cygpath -w "$PWD/dist")" installer/VinylSolutions.iss 2>&1 | tee -a inno.log
-          test -s dist/VinylSolutions-Setup.exe || { echo "::error title=Sin instalador::No se creó VinylSolutions-Setup.exe"; exit 1; }
+          test -s "dist/MiBiblioteca-$VER-Setup.exe" || { echo "::error title=Sin instalador::No se creó el instalador"; exit 1; }
 
       - name: ZIP portable
         shell: pwsh
         run: |
-          Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "dist/VinylSolutions-portable.zip" -Force
-          if (-not (Test-Path "dist/VinylSolutions-portable.zip")) { throw "No se creó el ZIP" }
+          Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "dist/MiBiblioteca-$env:VER-portable.zip" -Force
+          if (-not (Test-Path "dist/MiBiblioteca-$env:VER-portable.zip")) { throw "No se creó el ZIP" }
 
       - name: Appcast firmado
         if: env.RELEASE == 'true'
@@ -153,14 +153,14 @@ jobs:
             exit 1
           fi
           printf '%s\n' "$DSA_PRIV_PEM" > "$RUNNER_TEMP/dsa_priv.pem"
-          SIG=$(openssl dgst -sha1 -binary < dist/VinylSolutions-Setup.exe | openssl dgst -sha1 -sign "$RUNNER_TEMP/dsa_priv.pem" | openssl enc -base64 -A)
+          SIG=$(openssl dgst -sha1 -binary < "dist/MiBiblioteca-$VER-Setup.exe" | openssl dgst -sha1 -sign "$RUNNER_TEMP/dsa_priv.pem" | openssl enc -base64 -A)
           rm -f "$RUNNER_TEMP/dsa_priv.pem"
           [ -n "$SIG" ] || { echo "::error title=Firma vacía::No se pudo firmar el instalador"; exit 1; }
           # Misma cadena de versión que lleva el .exe (la que compara WinSparkle).
           PV=$(powershell -NoProfile -Command "(Get-Item 'build/windows/x64/runner/Release/vinyl_solutions.exe').VersionInfo.ProductVersion" | tr -d '\r')
           [ -n "$PV" ] || PV="$VER"
-          SIZE=$(stat -c %s dist/VinylSolutions-Setup.exe)
-          URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/VinylSolutions-Setup.exe"
+          SIZE=$(stat -c %s "dist/MiBiblioteca-$VER-Setup.exe")
+          URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/MiBiblioteca-${VER}-Setup.exe"
           cat > dist/appcast.xml <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
@@ -228,8 +228,8 @@ jobs:
         with:
           name: vinyl-solutions-windows
           path: |
-            dist/VinylSolutions-Setup.exe
-            dist/VinylSolutions-portable.zip
+            dist/MiBiblioteca-*-Setup.exe
+            dist/MiBiblioteca-*-portable.zip
             dist/appcast.xml
           if-no-files-found: warn
 
@@ -239,9 +239,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          for f in dist/VinylSolutions-Setup.exe dist/VinylSolutions-portable.zip dist/appcast.xml; do
+          for f in "dist/MiBiblioteca-$VER-Setup.exe" "dist/MiBiblioteca-$VER-portable.zip" dist/appcast.xml; do
             test -s "$f" || { echo "::error title=Falta archivo::$f"; exit 1; }
           done
-          gh release create "$TAG" dist/VinylSolutions-Setup.exe dist/VinylSolutions-portable.zip dist/appcast.xml \
+          gh release create "$TAG" "dist/MiBiblioteca-$VER-Setup.exe" "dist/MiBiblioteca-$VER-portable.zip" dist/appcast.xml \
             --title "Mi Biblioteca en la nube $VER" \
-            --notes "Instalador (VinylSolutions-Setup.exe) y versión portable (ZIP). La app instalada se actualiza sola."
+            --notes "Instalador (MiBiblioteca-$VER-Setup.exe) y versión portable (ZIP). La app instalada se actualiza sola."

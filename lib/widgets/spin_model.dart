@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 /// Objeto 3D "girable": una secuencia de [frames] imágenes de una vuelta completa.
 /// Al deslizar el dedo sobre él gira en su eje, con la fuerza del impulso y fricción.
 class SpinModel extends StatefulWidget {
-  const SpinModel({super.key, required this.folder, this.frames = 36, this.enabled = true});
+  const SpinModel({super.key, required this.folder, this.frames = 36, this.enabled = true, this.sway = false});
 
   /// Carpeta en assets/models3d/.
   final String folder;
@@ -17,6 +17,9 @@ class SpinModel extends StatefulWidget {
 
   /// Solo gira con el dedo si está activo (la tarjeta del frente).
   final bool enabled;
+
+  /// Balanceo suave de ida y vuelta (los cuadros cubren un arco corto, no una vuelta completa): paralaje.
+  final bool sway;
 
   static const initialFrame = 3;
 
@@ -36,6 +39,22 @@ class _SpinModelState extends State<SpinModel> with SingleTickerProviderStateMix
   void initState() {
     super.initState();
     _tick = createTicker(_onTick);
+    if (widget.sway) {
+      _pos = (widget.frames - 1) / 2;
+      if (widget.enabled) _tick.start();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant SpinModel old) {
+    super.didUpdateWidget(old);
+    if (widget.sway && old.enabled != widget.enabled) {
+      if (widget.enabled) {
+        _tick.start();
+      } else {
+        _tick.stop();
+      }
+    }
   }
 
   @override
@@ -53,6 +72,12 @@ class _SpinModelState extends State<SpinModel> with SingleTickerProviderStateMix
   String _path(int i) => 'assets/models3d/${widget.folder}/${i.toString().padLeft(2, '0')}.webp';
 
   void _onTick(Duration d) {
+    if (widget.sway) {
+      // Periodo de 7 s, empieza en el centro y va y viene con aceleración suave.
+      final ph = d.inMicroseconds / 7e6 * 2 * math.pi;
+      setState(() => _pos = (widget.frames - 1) / 2 * (1 + math.sin(ph)));
+      return;
+    }
     final f = _fling;
     if (f == null) return;
     final t = (d - _t0).inMicroseconds / 1e6;
@@ -87,7 +112,7 @@ class _SpinModelState extends State<SpinModel> with SingleTickerProviderStateMix
       gaplessPlayback: true,
       filterQuality: FilterQuality.medium,
     );
-    if (!widget.enabled) return img;
+    if (!widget.enabled || widget.sway) return img;
     return LayoutBuilder(
       builder: (context, cons) {
         // Arrastrar todo el ancho del icono = una vuelta y media.

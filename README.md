@@ -5,10 +5,10 @@ Biblioteca virtual de discos y cassettes (menú 360°, tocadisco, cassettes, Cov
 ## Descargar e instalar
 
 1. Ve a **[Releases](../../releases/latest)**.
-2. Descarga **`VinylSolutions-Setup.exe`** y ejecútalo (instala solo para tu usuario, con acceso directo y desinstalador).
+2. Descarga **`MiBiblioteca-<versión>-Setup.exe`** y ejecútalo (instala solo para tu usuario, con acceso directo y desinstalador).
 3. Si Windows muestra **«Windows protegió su PC»** (SmartScreen): toca **Más información → Ejecutar de todas formas**. Aparece porque el instalador no tiene certificado de firma de código (ver abajo).
 
-Alternativa sin instalar: descarga `VinylSolutions-portable.zip`, descomprímelo y abre `vinyl_solutions.exe`.
+Alternativa sin instalar: descarga `MiBiblioteca-<versión>-portable.zip`, descomprímelo y abre `vinyl_solutions.exe`.
 
 ## Actualizaciones automáticas
 

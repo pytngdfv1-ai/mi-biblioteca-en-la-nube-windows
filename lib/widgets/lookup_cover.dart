@@ -5,7 +5,7 @@ import '../models/vinyl.dart';
 import 'cover_art.dart';
 
 /// Portada que, si el disco no la tiene guardada, la busca en internet (una vez, con memoria)
-/// para verse igual que en las bibliotecas. La usan Hojear y la línea de tiempo.
+/// para verse igual que en las bibliotecas. La usa Hojear.
 class LookupCover extends StatefulWidget {
   const LookupCover({super.key, required this.vinyl, this.radius = 6});
   final Vinyl vinyl;

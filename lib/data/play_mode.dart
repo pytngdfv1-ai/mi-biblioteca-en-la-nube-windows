@@ -1,4 +1,4 @@
-enum PlayMode { disc, cassette, reel, ipod }
+enum PlayMode { disc, cassette, reel, ipod, walkman }
 
 /// Reproductor en el que se está navegando: cambia cómo se ve y suena cada elemento.
 /// null = según lo que sea cada elemento (disco, cassette o tema suelto).
@@ -13,7 +13,7 @@ class ViewMode {
     final m = current ?? (id == playingId ? playingMode : null);
     return switch (m) {
       PlayMode.disc => false,
-      PlayMode.cassette => true,
+      PlayMode.cassette || PlayMode.walkman => true,
       _ => cassette || single,
     };
   }
